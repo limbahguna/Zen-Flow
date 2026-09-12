@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — Mindful Space</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1A1E1A;
+      color: #C8D5B9;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .icon-wrap {
+      width: 80px;
+      height: 80px;
+      background: #2D3A2E;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #E8EDE3;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 15px;
+      color: #A3B197;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 320px;
+      margin-bottom: 32px;
+    }
+
+    button {
+      background: #4A5D3E;
+      color: #E8EDE3;
+      border: none;
+      border-radius: 12px;
+      padding: 0 28px;
+      height: 48px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #6B8C5A; }
+
+    /* Breathing animation */
+    .breath-wrap {
+      position: fixed;
+      inset: 0;
+      background: #1A1E1A;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .breath-wrap.active { display: flex; }
+
+    .circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #2D3A2E;
+      animation: breathe 11s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%   { transform: scale(0.75); }
+      36%  { transform: scale(1.7); }  /* inhale 4s */
+      64%  { transform: scale(1.7); }  /* hold 3s */
+      100% { transform: scale(0.75); } /* exhale 4s */
+    }
+
+    .breath-label {
+      font-size: 20px;
+      font-weight: 700;
+      color: #E8EDE3;
+    }
+    .breath-sub { font-size: 13px; color: #7A8A72; }
+
+    .back-btn {
+      background: transparent;
+      color: #5A6A52;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    .back-btn:hover { color: #A3B197; background: transparent; }
+  </style>
+</head>
+<body>
+
+  <div id="main">
+    <div class="icon-wrap">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 6C22 6 8 14 8 26C8 33.732 14.268 40 22 40C29.732 40 36 33.732 36 26C36 14 22 6 22 6Z" fill="#8FA680"/>
+        <line x1="22" y1="40" x2="22" y2="24" stroke="#1A1E1A" stroke-width="2" stroke-linecap="round"/>
+        <line x1="22" y1="30" x2="16" y2="24" stroke="#1A1E1A" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="22" y1="26" x2="28" y2="20" stroke="#1A1E1A" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>Don't worry — your breathing exercises still work offline. Reconnect to sync your data.</p>
+    <button onclick="startBreathing()">Try Breathing Exercise</button>
+  </div>
+
+  <div class="breath-wrap" id="breathing">
+    <div class="circle"></div>
+    <div>
+      <div class="breath-label" id="phase-label">Breathe in...</div>
+      <div class="breath-sub" style="text-align:center;margin-top:4px">4-7-8 breathing</div>
+    </div>
+    <button class="back-btn" onclick="stopBreathing()">← Back</button>
+  </div>
+
+  <script>
+    const PHASES = [
+      { label: 'Breathe in...', duration: 4000 },
+      { label: 'Hold...', duration: 7000 },
+      { label: 'Breathe out...', duration: 8000 },
+    ];
+    let phaseIdx = 0;
+    let timer = null;
+
+    function nextPhase() {
+      phaseIdx = (phaseIdx + 1) % PHASES.length;
+      document.getElementById('phase-label').textContent = PHASES[phaseIdx].label;
+      timer = setTimeout(nextPhase, PHASES[phaseIdx].duration);
+    }
+
+    function startBreathing() {
+      document.getElementById('main').style.display = 'none';
+      document.getElementById('breathing').classList.add('active');
+      document.getElementById('phase-label').textContent = PHASES[0].label;
+      timer = setTimeout(nextPhase, PHASES[0].duration);
+    }
+
+    function stopBreathing() {
+      clearTimeout(timer);
+      document.getElementById('breathing').classList.remove('active');
+      document.getElementById('main').style.display = '';
+    }
+  </script>
+</body>
+</html>

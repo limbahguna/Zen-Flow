@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mindful Space</string>
+    <string name="title_activity_main">Mindful Space</string>
+    <string name="package_name">com.davidhendrya.mindfulspace</string>
+    <string name="custom_url_scheme">com.davidhendrya.mindfulspace</string>
+</resources>

@@ -1,0 +1,30 @@
+modules = ["nodejs-24", "python-3.11", "postgresql-16", "java-graalvm22.3"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_SUPABASE_ANON_KEY = ""
+VITE_SUPABASE_URL = "https://mdawcxxihzkaxozxznyx.supabase.co"
+
+[nix]
+channel = "stable-25_05"
+packages = ["zip", "android-tools", "jdk17_headless", "jdk21_headless", "xorg.libX11", "xorg.libxcb", "xorg.libXrender", "xorg.libXi", "xorg.libXext", "libGL", "libpulseaudio", "nss", "gtk3"]

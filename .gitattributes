@@ -1,0 +1,5 @@
+mindful-space-complete-workspace.zip filter=lfs diff=lfs merge=lfs -text
+mindful-space-complete-workspace-latest.zip filter=lfs diff=lfs merge=lfs -text
+mindful-space-complete-latest.zip filter=lfs diff=lfs merge=lfs -text
+mindful-space-task23-latest.zip filter=lfs diff=lfs merge=lfs -text
+mindful-space-task23-oauth-safearea-latest.zip filter=lfs diff=lfs merge=lfs -text

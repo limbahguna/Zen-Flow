@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+    <title>Mindful Space</title>
+
+    <!-- Prevent browsers from serving stale cached versions of this file -->
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+
+    <!-- Primary meta -->
+    <meta name="description" content="A calmer way to get things done. Overcome procrastination and anxiety with science-backed techniques." />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1A1E1A" />
+    <style>
+      html, body, #root {
+        min-height: 100%;
+        margin: 0;
+        background: #1A1E1A;
+      }
+    </style>
+    <script>
+      if (
+        window.location.protocol === "https:" &&
+        window.location.hostname === "localhost"
+      ) {
+        document.documentElement.classList.add("capacitor-native");
+      }
+    </script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mindful Space" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Mindful Space" />
+    <meta property="og:description" content="A calmer way to get things done. Overcome procrastination and anxiety with science-backed techniques." />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mindful Space" />
+    <meta name="twitter:description" content="A calmer way to get things done. Overcome procrastination and anxiety with science-backed techniques." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      var isReplitDev =
+        window.location.hostname.endsWith(".replit.dev") ||
+        window.location.hostname === "localhost";
+      var isCapacitor =
+        window.location.protocol === "capacitor:" ||
+        (window.location.protocol === "https:" &&
+          window.location.hostname === "localhost");
+
+      if (isReplitDev || isCapacitor) {
+        // Dev/preview: unregister all service workers and clear all caches
+        // so Vite HMR and fresh builds are never blocked by SW cache-first strategy.
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function(registrations) {
+              registrations.forEach(function(reg) { reg.unregister(); });
+            });
+        }
+        if (window.caches) {
+          caches.keys().then(function(keys) {
+            Promise.all(keys.map(function(key) { return caches.delete(key); }));
+          });
+        }
+      } else if ('serviceWorker' in navigator) {
+        // Production only: register SW
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .catch(function(err) { console.warn('SW registration failed:', err); });
+        });
+      }
+    </script>
+  </body>
+</html>

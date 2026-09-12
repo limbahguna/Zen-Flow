@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "ca1e79a2-b26a-4519-959c-61a708905b93"
+      }
+    },
+    "android": {
+      "package": "com.david1584.mindfulspace"
+    }
+  }
+}

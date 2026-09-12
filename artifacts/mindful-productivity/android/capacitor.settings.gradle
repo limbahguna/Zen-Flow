@@ -1,0 +1,12 @@
+// Capacitor modules are vendored so this Android project is self-contained.
+include ':capacitor-android'
+project(':capacitor-android').projectDir = new File('./capacitor-android/')
+
+include ':capacitor-app'
+project(':capacitor-app').projectDir = new File('./capacitor-app/')
+
+include ':capacitor-browser'
+project(':capacitor-browser').projectDir = new File('./capacitor-browser/')
+
+include ':capacitor-local-notifications'
+project(':capacitor-local-notifications').projectDir = new File('./capacitor-local-notifications/')
