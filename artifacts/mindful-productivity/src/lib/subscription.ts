@@ -1,3 +1,5 @@
+import { appApiUrl } from "./apiRuntime";
+
 export type PlanId = "free" | "plus" | "pro";
 export type PricingRegion = "global" | "indonesia" | "japan";
 export const DEFAULT_PRICING_REGION: PricingRegion = "global";
@@ -64,15 +66,12 @@ export interface SubscriptionStatus {
   billingAvailable: boolean;
 }
 
-const rawBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
-const API_BASE = rawBase ? rawBase.replace(/\/$/, "") : "";
-
 export async function fetchSubscription(
   accessToken: string,
   region: PricingRegion,
 ): Promise<SubscriptionStatus> {
   const response = await fetch(
-    `${API_BASE}/api/subscription?region=${encodeURIComponent(region)}`,
+    appApiUrl(`/api/subscription?region=${encodeURIComponent(region)}`),
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     },

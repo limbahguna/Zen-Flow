@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
-    "build:android:web": "BASE_PATH=/ vite build --config vite.config.ts --mode android",
+    "build:android:web": "vite build --config vite.config.ts --mode android",
     "cap:sync:android": "pnpm exec cap sync android",
     "android:prepare": "pnpm run build:android:web && pnpm run cap:sync:android",
     "android:open": "pnpm exec cap open android",

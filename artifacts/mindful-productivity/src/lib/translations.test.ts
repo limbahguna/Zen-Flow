@@ -57,6 +57,12 @@ describe("t() — translation lookup", () => {
     expect(t("id", "practice.tab.lessons")).toBe("Pelajaran");
   });
 
+  it("uses Daily Insight terminology for the dashboard lesson label", () => {
+    expect(t("en", "dashboard.quickActions.lessons")).toBe("Daily Insight");
+    expect(t("id", "dashboard.quickActions.lessons")).toBe("Wawasan Harian");
+    expect(t("ja", "dashboard.quickActions.lessons")).toBe("デイリーインサイト");
+  });
+
   it("returns Indonesian coach strings", () => {
     expect(t("id", "coach.placeholder")).toBe("Ceritakan apa yang ada di pikiranmu…");
     expect(t("id", "coach.emptyTitle")).toBe("Teman mindful-mu");

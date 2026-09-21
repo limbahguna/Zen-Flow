@@ -1,31 +1,25 @@
 /**
  * ReminderService — abstraction layer for local reminders.
  *
- * Current implementation (WebReminderService):
- *   - Uses the browser Notifications API when available and permitted.
- *   - Falls back to an in-app banner (via a callback) when:
- *       • Notifications API not supported
- *       • Permission denied
- *       • App is the active tab (in-app banner is friendlier)
- *   - Provides in-app scheduler (setInterval) that fires when the app is open.
+ * Web fallback (WebReminderService):
+ *   - Browser Notifications API when available and permitted.
+ *   - In-app banner when unsupported, denied, or as a friendlier foreground UX.
+ *   - setInterval scheduler that only fires while the tab is open.
  *
- * ⚠️  Background limitation (documented, not hidden):
- *   A web app served from Replit (or any static host without a persistent server)
- *   cannot reliably deliver notifications when the browser tab is closed.
- *   True background reminders require either:
- *     a) Web Push (VAPID keys + push server — backend work needed), or
- *     b) Capacitor Local Notifications (for native iOS/Android builds).
- *   This interface is designed so that a CapacitorReminderService can be swapped
- *   in later without changing any UI component code.
- *
- * Interface contract:
- *   ReminderService.requestPermission()    → "granted" | "denied" | "unsupported"
- *   ReminderService.getPermissionStatus()  → "granted" | "denied" | "default" | "unsupported"
- *   ReminderService.showTestNotification() → Promise<void>
- *   ReminderService.scheduleReminder()     → starts in-app scheduler
- *   ReminderService.cancelReminder()       → stops in-app scheduler
- *   ReminderService.snoozeReminder()       → schedules one-off +10 min in-app
+ * Capacitor Android:
+ *   - @capacitor/local-notifications, including background/closed-app delivery.
+ *   - Browser Notification/setInterval is not used on native.
  */
+
+import { Capacitor } from "@capacitor/core";
+import { resolveLocalNotificationPermission } from "@/lib/localReminderNotifications";
+import {
+  cancelMovementReminders,
+  isTimeInQuietHours,
+  scheduleMovementReminder,
+  scheduleMovementSnooze,
+  scheduleMovementTestNotification,
+} from "@/lib/movementNotifications";
 
 export type PermissionStatus = "granted" | "denied" | "default" | "unsupported";
 
@@ -51,24 +45,14 @@ export interface ReminderNotification {
 /** Callback invoked when an in-app banner should be shown. */
 export type InAppBannerCallback = (notification: ReminderNotification) => void;
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
 function isNotificationsSupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window && window.Notification != null;
 }
 
 function isInQuietHours(quietStart: string, quietEnd: string): boolean {
   const now = new Date();
-  const hhmm = (s: string) => {
-    const [h, m] = s.split(":").map(Number);
-    return h * 60 + (m || 0);
-  };
-  const cur = now.getHours() * 60 + now.getMinutes();
-  const qs = hhmm(quietStart);
-  const qe = hhmm(quietEnd);
-  if (qs <= qe) return cur >= qs && cur < qe;
-  // Wraps midnight
-  return cur >= qs || cur < qe;
+  const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  return isTimeInQuietHours(hhmm, quietStart, quietEnd);
 }
 
 function isScheduledNow(config: ReminderConfig): boolean {
@@ -79,15 +63,12 @@ function isScheduledNow(config: ReminderConfig): boolean {
   return now.getHours() === h && now.getMinutes() === m;
 }
 
-// ── Web implementation ────────────────────────────────────────────────────────
-
 class WebReminderService {
   private schedulerInterval: ReturnType<typeof setInterval> | null = null;
   private snoozeTimeout: ReturnType<typeof setTimeout> | null = null;
   private lastFiredMinute: string | null = null;
   private onBanner: InAppBannerCallback | null = null;
 
-  /** Register the callback that shows an in-app banner. */
   setBannerCallback(cb: InAppBannerCallback) {
     this.onBanner = cb;
   }
@@ -112,7 +93,6 @@ class WebReminderService {
   async showTestNotification(notification: ReminderNotification): Promise<void> {
     const status = await this.requestPermission();
     if (status === "granted" && isNotificationsSupported()) {
-      // Prefer SW-backed notification when available
       if ("serviceWorker" in navigator) {
         try {
           const reg = await navigator.serviceWorker.ready;
@@ -130,27 +110,21 @@ class WebReminderService {
         icon: "/icons/icon-192.png",
       });
     } else {
-      // Fallback: in-app banner
       this.onBanner?.(notification);
     }
   }
 
-  /**
-   * Start the in-app scheduler.
-   * Fires at most once per minute. Checks quiet hours and day/time match.
-   */
   scheduleReminder(config: ReminderConfig, notification: ReminderNotification) {
     this.cancelReminder();
     this.schedulerInterval = setInterval(() => {
       if (!config.enabled) return;
       if (isInQuietHours(config.quietStart, config.quietEnd)) return;
       if (!isScheduledNow(config)) return;
-      // Deduplicate: only fire once per HH:MM slot
       const key = `${new Date().getHours()}:${new Date().getMinutes()}`;
       if (this.lastFiredMinute === key) return;
       this.lastFiredMinute = key;
-      this.showTestNotification(notification);
-    }, 10_000); // poll every 10s (fires within 10s of scheduled time)
+      void this.showTestNotification(notification);
+    }, 10_000);
   }
 
   cancelReminder() {
@@ -165,28 +139,116 @@ class WebReminderService {
     this.lastFiredMinute = null;
   }
 
-  /** Show a one-off reminder 10 minutes from now (in-app). */
   snoozeReminder(notification: ReminderNotification): Date {
     if (this.snoozeTimeout !== null) clearTimeout(this.snoozeTimeout);
     const fireAt = new Date(Date.now() + 10 * 60 * 1000);
     this.snoozeTimeout = setTimeout(() => {
-      this.showTestNotification(notification);
+      void this.showTestNotification(notification);
       this.snoozeTimeout = null;
     }, 10 * 60 * 1000);
     return fireAt;
   }
 }
 
-export const reminderService = new WebReminderService();
+const webReminderService = new WebReminderService();
+let nativePermissionStatus: PermissionStatus = "default";
 
-// ── Movement reminder config helpers ─────────────────────────────────────────
+function isNativeReminders(): boolean {
+  return Capacitor.isNativePlatform();
+}
+
+export function movementReminderCopy(
+  config: ReminderConfig,
+  translate: (key: string) => string,
+): ReminderNotification {
+  return {
+    title: translate("reminder.banner.title"),
+    body: translate("reminder.banner.body")
+      .replace("{duration}", String(config.duration))
+      .replace("{type}", translate(`profile.movement.type.${config.type}`)),
+  };
+}
+
+export const reminderService = {
+  setBannerCallback(cb: InAppBannerCallback) {
+    webReminderService.setBannerCallback(cb);
+  },
+
+  getPermissionStatus(): PermissionStatus {
+    if (isNativeReminders()) return nativePermissionStatus;
+    return webReminderService.getPermissionStatus();
+  },
+
+  async refreshPermission(): Promise<PermissionStatus> {
+    if (isNativeReminders()) {
+      nativePermissionStatus = await resolveLocalNotificationPermission(false);
+      return nativePermissionStatus;
+    }
+    return webReminderService.getPermissionStatus();
+  },
+
+  async requestPermission(): Promise<PermissionStatus> {
+    if (isNativeReminders()) {
+      nativePermissionStatus = await resolveLocalNotificationPermission(true);
+      return nativePermissionStatus;
+    }
+    return webReminderService.requestPermission();
+  },
+
+  async showTestNotification(notification: ReminderNotification): Promise<void> {
+    if (isNativeReminders()) {
+      const scheduled = await scheduleMovementTestNotification(notification, true);
+      nativePermissionStatus = await resolveLocalNotificationPermission(false);
+      if (!scheduled) throw new Error("Test notification was not pending after scheduling");
+      return;
+    }
+    await webReminderService.showTestNotification(notification);
+  },
+
+  async scheduleReminder(
+    config: ReminderConfig,
+    notification: ReminderNotification,
+  ): Promise<boolean> {
+    if (isNativeReminders()) {
+      if (!config.enabled) {
+        await cancelMovementReminders();
+        return true;
+      }
+      const scheduled = await scheduleMovementReminder(config, notification, false);
+      nativePermissionStatus = await resolveLocalNotificationPermission(false);
+      return scheduled;
+    }
+    if (!config.enabled) {
+      webReminderService.cancelReminder();
+      return true;
+    }
+    webReminderService.scheduleReminder(config, notification);
+    return true;
+  },
+
+  async cancelReminder(): Promise<void> {
+    if (isNativeReminders()) {
+      await cancelMovementReminders();
+      return;
+    }
+    webReminderService.cancelReminder();
+  },
+
+  snoozeReminder(notification: ReminderNotification): Date {
+    if (isNativeReminders()) {
+      void scheduleMovementSnooze(notification);
+      return new Date(Date.now() + 10 * 60 * 1000);
+    }
+    return webReminderService.snoozeReminder(notification);
+  },
+};
 
 const MOVEMENT_REMINDER_KEY = "mindful_movement_reminder";
 
 export const DEFAULT_MOVEMENT_CONFIG: ReminderConfig = {
   enabled: false,
   time: "10:00",
-  days: [1, 2, 3, 4, 5], // Mon–Fri
+  days: [1, 2, 3, 4, 5],
   duration: 5,
   type: "stretch",
   quietStart: "22:00",
@@ -209,15 +271,13 @@ export function saveMovementConfig(config: ReminderConfig): void {
   } catch {}
 }
 
-// ── Movement session completion helpers ───────────────────────────────────────
-
 const MOVEMENT_COMPLETIONS_KEY = "mindful_movement_completions";
 
 export function recordMovementCompletion(dateStr: string): boolean {
   try {
     const raw = localStorage.getItem(MOVEMENT_COMPLETIONS_KEY);
     const completions: string[] = raw ? JSON.parse(raw) : [];
-    if (completions.includes(dateStr)) return false; // already recorded today
+    if (completions.includes(dateStr)) return false;
     completions.push(dateStr);
     localStorage.setItem(MOVEMENT_COMPLETIONS_KEY, JSON.stringify(completions));
     return true;

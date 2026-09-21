@@ -1,6 +1,13 @@
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import type { Intention } from "./intentions";
+import {
+  reminderScheduleAt,
+  reminderScheduleOn,
+  resolveLocalNotificationPermission,
+  scheduleVerifiedLocalNotifications,
+} from "./localReminderNotifications";
+import { isMovementNotificationExtra } from "./movementNotifications";
 
 const MAX_NOTIFICATION_SLOTS = 7;
 export const INTENTION_DEEP_LINK = "/practice?tab=intentions";
@@ -12,6 +19,12 @@ export function intentionPathFromNotificationExtra(extra: unknown): string | nul
     path.startsWith(`${INTENTION_DEEP_LINK}&intention=`)
     ? path
     : null;
+}
+
+export function isIntentionNotificationExtra(extra: unknown): boolean {
+  if (!extra || typeof extra !== "object") return false;
+  return typeof (extra as { intentionId?: unknown }).intentionId === "string" ||
+    intentionPathFromNotificationExtra(extra) !== null;
 }
 
 export function intentionNotificationBaseId(id: string): number {
@@ -33,12 +46,14 @@ export async function cancelIntentionReminder(id: string): Promise<void> {
 export async function clearDeviceIntentionNotifications(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   const pending = await LocalNotifications.getPending();
-  if (pending.notifications.length > 0) {
+  const intentionPending = pending.notifications.filter((item) =>
+    isIntentionNotificationExtra(item.extra) && !isMovementNotificationExtra(item.extra),
+  );
+  if (intentionPending.length > 0) {
     await LocalNotifications.cancel({
-      notifications: pending.notifications.map(({ id }) => ({ id })),
+      notifications: intentionPending.map(({ id }) => ({ id })),
     });
   }
-  await LocalNotifications.removeAllDeliveredNotifications();
 }
 
 function timeParts(value: string | null) {
@@ -66,13 +81,8 @@ export async function scheduleIntentionReminder(
     !intention.reminder_time
   ) return false;
 
-  const permission = await LocalNotifications.checkPermissions();
-  const resolved = permission.display === "granted"
-    ? permission
-    : requestPermission
-      ? await LocalNotifications.requestPermissions()
-      : permission;
-  if (resolved.display !== "granted") return false;
+  const permission = await resolveLocalNotificationPermission(requestPermission);
+  if (permission !== "granted") return false;
 
   const { hour, minute } = timeParts(intention.reminder_time);
   const base = intentionNotificationBaseId(intention.id);
@@ -83,34 +93,28 @@ export async function scheduleIntentionReminder(
   const common = {
     title: "Today's intention",
     body: intention.small_action,
-    schedule: { allowWhileIdle: true },
     extra,
   };
 
   if (intention.frequency === "selected_days") {
-    await LocalNotifications.schedule({
-      notifications: intention.selected_days.map((day, index) => ({
+    return scheduleVerifiedLocalNotifications(
+      intention.selected_days.map((day, index) => ({
         ...common,
         id: base + index,
-        schedule: { on: { weekday: day + 1, hour, minute }, allowWhileIdle: true },
+        schedule: reminderScheduleOn({ weekday: day + 1, hour, minute }),
       })),
-    });
-  } else if (intention.frequency === "daily") {
-    await LocalNotifications.schedule({
-      notifications: [{
-        ...common,
-        id: base,
-        schedule: { on: { hour, minute }, allowWhileIdle: true },
-      }],
-    });
-  } else {
-    await LocalNotifications.schedule({
-      notifications: [{
-        ...common,
-        id: base,
-        schedule: { at: nextOccurrence(hour, minute), allowWhileIdle: true },
-      }],
-    });
+    );
   }
-  return true;
+  if (intention.frequency === "daily") {
+    return scheduleVerifiedLocalNotifications([{
+      ...common,
+      id: base,
+      schedule: reminderScheduleOn({ hour, minute }),
+    }]);
+  }
+  return scheduleVerifiedLocalNotifications([{
+    ...common,
+    id: base,
+    schedule: reminderScheduleAt(nextOccurrence(hour, minute)),
+  }]);
 }

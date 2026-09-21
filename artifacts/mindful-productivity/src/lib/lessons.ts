@@ -106,19 +106,93 @@ export async function fetchLessons(lang: LanguageCode = "en"): Promise<LessonRow
   return [...remote, ...extras].sort((a, b) => a.sort_order - b.sort_order);
 }
 
+const LESSON_PROGRESS_CONFLICT_TARGET = "user_id,lesson_id";
+
+export interface SanitizedPostgrestError {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+}
+
+function asTrimmedString(value: unknown, maxLength = 300): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, maxLength);
+}
+
+/** Safe subset of a PostgREST/Supabase error — never includes headers, JWT, or env. */
+export function sanitizePostgrestError(error: unknown): SanitizedPostgrestError {
+  if (!error || typeof error !== "object") {
+    return { message: "unknown_error" };
+  }
+  const record = error as Record<string, unknown>;
+  return {
+    code: asTrimmedString(record.code, 40),
+    message: asTrimmedString(record.message),
+    details: asTrimmedString(record.details),
+    hint: asTrimmedString(record.hint),
+  };
+}
+
+export function logSanitizedLessonProgressError(
+  error: unknown,
+  isDev: boolean = import.meta.env.DEV,
+): void {
+  if (!isDev) return;
+  console.error("[lesson_progress]", sanitizePostgrestError(error));
+}
+
+function isUnsupportedUpsert(error: { code?: string | null; message?: string | null }): boolean {
+  if (error.code === "42P10") return true;
+  const message = error.message ?? "";
+  return /ON CONFLICT/i.test(message) && /unique or exclusion constraint/i.test(message);
+}
+
+/**
+ * Saves Yes/No feedback. Prefers upsert on (user_id, lesson_id). If the unique
+ * constraint is not applied yet, falls back to insert so UUID remote lessons
+ * keep working. Bundled `local-*` ids still need the text-column migration.
+ */
 export async function saveLessonProgress(
   userId: string,
   lessonId: string,
   helpful: boolean,
 ): Promise<void> {
-  const { error } = await supabase.from("lesson_progress").insert([
-    {
-      user_id: userId,
-      lesson_id: lessonId,
-      read_at: new Date().toISOString(),
-      helpful,
-    },
-  ]);
+  const row = {
+    user_id: userId,
+    lesson_id: lessonId,
+    read_at: new Date().toISOString(),
+    helpful,
+  };
 
-  if (error) throw error;
+  const { error } = await supabase
+    .from("lesson_progress")
+    .upsert(row, { onConflict: LESSON_PROGRESS_CONFLICT_TARGET });
+  if (!error) return;
+  if (!isUnsupportedUpsert(error)) throw error;
+
+  const { error: insertError } = await supabase.from("lesson_progress").insert(row);
+  if (insertError) throw insertError;
+}
+
+export interface LessonProgressRow {
+  lesson_id: string;
+  read_at: string;
+  helpful: boolean | null;
+}
+
+/** Read-only history for adaptive Daily Insight ranking. */
+export async function listLessonProgress(userId: string): Promise<LessonProgressRow[]> {
+  const { data, error } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id, read_at, helpful")
+    .eq("user_id", userId)
+    .order("read_at", { ascending: false });
+  if (error) {
+    logSanitizedLessonProgressError(error);
+    throw error;
+  }
+  return (data ?? []) as LessonProgressRow[];
 }

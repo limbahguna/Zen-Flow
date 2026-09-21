@@ -27,6 +27,7 @@ import { render, screen, cleanup, waitFor, within } from "@testing-library/react
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { Router } from "wouter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LanguageProvider, useLanguage } from "@/context/LanguageContext";
 import type { LanguageCode } from "@/lib/translations";
 import { getLocalLessons } from "@/lib/localLessons";
@@ -42,20 +43,21 @@ vi.mock("@/lib/supabase", () => ({
       })),
     },
     from: vi.fn(() => {
-      const query = {
-        select: vi.fn(),
-        eq: vi.fn(),
-        gte: vi.fn(),
-        lt: vi.fn(),
-        order: vi.fn(),
-        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
-        insert: vi.fn().mockResolvedValue({ error: null }),
-      };
-      query.select.mockReturnValue(query);
-      query.eq.mockReturnValue(query);
-      query.gte.mockReturnValue(query);
-      query.lt.mockReturnValue(query);
-      query.order.mockReturnValue(query);
+      const result = { data: [] as unknown[], error: null };
+      const query: Record<string, unknown> = {};
+      const self = () => query;
+      query.select = vi.fn(self);
+      query.eq = vi.fn(self);
+      query.gte = vi.fn(self);
+      query.lte = vi.fn(self);
+      query.lt = vi.fn(self);
+      query.in = vi.fn(self);
+      query.order = vi.fn(self);
+      query.limit = vi.fn(() => Promise.resolve(result));
+      query.maybeSingle = vi.fn(() => Promise.resolve({ data: null, error: null }));
+      query.insert = vi.fn(() => Promise.resolve({ error: null }));
+      query.then = (resolve: (value: unknown) => unknown, reject?: (reason: unknown) => unknown) =>
+        Promise.resolve(result).then(resolve, reject);
       return query;
     }),
   },
@@ -103,6 +105,25 @@ vi.mock("@/hooks/useIntentions", () => ({
 vi.mock("@/hooks/use-toast", () => ({
   useToast: vi.fn(() => ({ toast: vi.fn() })),
 }));
+
+vi.mock("@/lib/wellness/insightHistory", () => ({
+  loadAdaptiveInsightSignals: vi.fn(async () => ({
+    progress: [],
+    insightReads: [],
+    failed: false,
+  })),
+}));
+
+vi.mock("@/lib/wellness/dailyPlans", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/wellness/dailyPlans")>();
+  return {
+    ...actual,
+    getDailyPlanForDate: vi.fn(async () => null),
+    loadOrCreateDailyPlan: vi.fn(async () => {
+      throw new Error("dashboard must not create a Daily Plan");
+    }),
+  };
+});
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual =
@@ -273,15 +294,20 @@ describe("LearnPage — open lesson reconciliation across locales", () => {
 describe("Dashboard — open lesson reconciliation across locales", () => {
   async function renderDashboard() {
     const { default: DashboardPage } = await import("@/pages/dashboard");
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     return render(
-      <LanguageProvider>
-        <Router>
-          <LangSwitchButton lang="id" />
-          <LangSwitchButton lang="ja" />
-          <LangSwitchButton lang="en" />
-          <DashboardPage />
-        </Router>
-      </LanguageProvider>,
+      <QueryClientProvider client={client}>
+        <LanguageProvider>
+          <Router>
+            <LangSwitchButton lang="id" />
+            <LangSwitchButton lang="ja" />
+            <LangSwitchButton lang="en" />
+            <DashboardPage />
+          </Router>
+        </LanguageProvider>
+      </QueryClientProvider>,
     );
   }
 

@@ -40,4 +40,17 @@ describe("authenticated custom fetch", () => {
     await expect(customFetch("/api/tasks")).rejects.toBeInstanceOf(AuthTokenUnavailableError);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it("prepends a remote origin without duplicating /api", async () => {
+    const fetchSpy = vi.fn(async () => new Response("{}", {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    }));
+    vi.stubGlobal("fetch", fetchSpy);
+    setBaseUrl("https://getmindfulspace.com");
+
+    await customFetch("/api/sleep/insights", { responseType: "json" });
+
+    expect(fetchSpy.mock.calls[0][0]).toBe("https://getmindfulspace.com/api/sleep/insights");
+  });
 });

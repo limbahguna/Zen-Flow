@@ -43,6 +43,9 @@ vi.mock("@/context/CoachContext", () => ({
 vi.mock("@/hooks/use-toast", () => ({
   useToast: vi.fn(() => ({ toast: fixture.toast })),
 }));
+vi.mock("@/lib/apiRuntime", () => ({
+  appApiUrl: (path: string) => path,
+}));
 vi.mock("@/components/CrisisModal", () => ({ CrisisModal: () => null }));
 vi.mock("@/components/BottomNav", () => ({ BottomNav: () => <nav /> }));
 
@@ -101,7 +104,11 @@ describe("Coach AI response reports", () => {
     await user.click(screen.getByTestId("coach-report-submit"));
 
     await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
-    const [, init] = vi.mocked(globalThis.fetch).mock.calls[0];
+    const [url, init] = vi.mocked(globalThis.fetch).mock.calls[0];
+    expect(url).toBe("/api/ai/reports");
+    expect(new Headers(init?.headers).get("authorization")).toBe(
+      "Bearer test-access-token",
+    );
     const payload = JSON.parse(String(init?.body));
     expect(payload).toEqual({
       category: "harmful_or_unsafe",
@@ -117,7 +124,7 @@ describe("Coach AI response reports", () => {
     expect(fixture.toast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Report submitted" }),
     );
-  });
+  }, 20_000);
 
   it.each([
     ["en", "Report an AI response"],

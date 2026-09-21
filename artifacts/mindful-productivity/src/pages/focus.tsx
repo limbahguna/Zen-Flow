@@ -172,7 +172,8 @@ export default function FocusPage() {
     clearInterval(intervalRef.current);
     setRunning(false); setDone(false); setElapsedSecs(0);
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
-    setLocation("/dashboard");
+    const fromDailyPlan = new URLSearchParams(window.location.search).get("from") === "daily-plan";
+    setLocation(fromDailyPlan ? "/daily-plan" : "/dashboard");
   }
   function handleStartAnother() {
     setDone(false); setTimeLeft(duration * 60); setElapsedSecs(0); setRunning(false);

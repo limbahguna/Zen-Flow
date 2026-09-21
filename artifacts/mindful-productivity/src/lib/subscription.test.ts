@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { DEFAULT_PRICING_REGION, pricingRegionForDevice } from "./subscription";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_PRICING_REGION, fetchSubscription, pricingRegionForDevice } from "./subscription";
+import { resolveApiUrl } from "./apiBaseUrl";
 
 describe("pricing region from device", () => {
   it.each([
@@ -17,5 +18,48 @@ describe("pricing region from device", () => {
 
   it("uses Global/USD for an unknown locale", () => {
     expect(pricingRegionForDevice("fr-FR", "UTC")).toBe(DEFAULT_PRICING_REGION);
+  });
+});
+
+describe("subscription API URL", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends the existing bearer token to the resolved subscription endpoint", async () => {
+    const fetchSpy = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        activePlan: "free",
+        dailyLimit: 5,
+        usedToday: 0,
+        remainingToday: 5,
+        selectedRegion: "global",
+        billingAvailable: false,
+        plans: [],
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await fetchSubscription("test-access-token", "japan");
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0];
+    expect(String(url)).toContain("/api/subscription?region=japan");
+    expect(String(url)).not.toContain("/api/api/");
+    expect(new Headers(init.headers).get("authorization")).toBe(
+      "Bearer test-access-token",
+    );
+  });
+
+  it("keeps the Android production subscription URL on the canonical origin", () => {
+    expect(
+      resolveApiUrl("/api/subscription?region=indonesia", {
+        rawEnv: "",
+        mode: "android",
+        isDev: false,
+        isNative: true,
+      }),
+    ).toBe("https://getmindfulspace.com/api/subscription?region=indonesia");
   });
 });

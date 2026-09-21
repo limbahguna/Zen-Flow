@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLocation } from "wouter";
 import { trackEvent } from "@/lib/analytics";
+import { appApiUrl } from "@/lib/apiRuntime";
 
 // AI calls go to the backend — no API key in the frontend.
 
@@ -27,11 +28,6 @@ function hasCrisisKeywords(text: string): boolean {
   return CRISIS_KEYWORDS.some(kw => lower.includes(kw));
 }
 
-// ── API base URL for Capacitor / cross-origin deployments ────────────────────
-const _rawBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
-const API_BASE = _rawBase ? _rawBase.replace(/\/$/, "") : "";
-const COACH_API_URL = `${API_BASE}/api/ai/coach`;
-const REPORT_API_URL = `${API_BASE}/api/ai/reports`;
 const REPORT_CATEGORIES = [
   "harmful_or_unsafe",
   "offensive_or_discriminatory",
@@ -183,7 +179,7 @@ export default function CoachPage() {
     setReportError(null);
 
     try {
-      const res = await fetch(REPORT_API_URL, {
+      const res = await fetch(appApiUrl("/api/ai/reports"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -243,7 +239,7 @@ export default function CoachPage() {
     setMessages(history); setInput(""); setError(null); setTyping(true);
 
     try {
-      const res = await fetch(COACH_API_URL, {
+      const res = await fetch(appApiUrl("/api/ai/coach"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

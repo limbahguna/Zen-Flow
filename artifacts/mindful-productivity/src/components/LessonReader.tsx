@@ -4,14 +4,30 @@ import { ArrowLeft, Clock, ThumbsUp, ThumbsDown, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
-import { categoryMeta, saveLessonProgress, type LessonRow } from "@/lib/lessons";
+import {
+  categoryMeta,
+  logSanitizedLessonProgressError,
+  saveLessonProgress,
+  type LessonRow,
+} from "@/lib/lessons";
 
 interface LessonReaderProps {
   lesson: LessonRow;
   onClose: () => void;
+  markReadLabel?: string;
+  onMarkRead?: () => void;
+  markReadDisabled?: boolean;
+  markReadDone?: boolean;
 }
 
-export function LessonReader({ lesson, onClose }: LessonReaderProps) {
+export function LessonReader({
+  lesson,
+  onClose,
+  markReadLabel,
+  onMarkRead,
+  markReadDisabled,
+  markReadDone,
+}: LessonReaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -34,8 +50,13 @@ export function LessonReader({ lesson, onClose }: LessonReaderProps) {
     try {
       await saveLessonProgress(user.id, lesson.id, helpful);
       setSubmitted(true);
-    } catch {
-      toast({ title: t("lesson.toast.error.title"), description: t("lesson.toast.error.desc"), variant: "destructive" });
+    } catch (error) {
+      logSanitizedLessonProgressError(error);
+      toast({
+        title: t("lesson.toast.error.title"),
+        description: t("lesson.toast.error.desc"),
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -91,6 +112,18 @@ export function LessonReader({ lesson, onClose }: LessonReaderProps) {
         >
           {lesson.content}
         </p>
+
+        {onMarkRead && (
+          <button
+            type="button"
+            onClick={onMarkRead}
+            disabled={markReadDisabled || markReadDone}
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#4A5D3E] text-sm font-medium text-[#E8EDE3] hover:bg-[#6B8C5A] disabled:opacity-60"
+            data-testid="lesson-mark-read"
+          >
+            {markReadLabel}
+          </button>
+        )}
 
         <div className="mt-10 pt-6 border-t border-[#2D3A2E]">
           {submitted ? (

@@ -19,11 +19,12 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { PersonStanding, Bell, BellOff, Info } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { isNativeApp } from "@/lib/native";
 import {
   reminderService,
   loadMovementConfig,
   saveMovementConfig,
-  DEFAULT_MOVEMENT_CONFIG,
+  movementReminderCopy,
   type ReminderConfig,
   type PermissionStatus,
 } from "@/services/reminderService";
@@ -52,6 +53,7 @@ interface Props {
 
 export function MovementReminderSettings({ onStartSession }: Props) {
   const { t } = useLanguage();
+  const nativeApp = isNativeApp();
 
   const [config, setConfig] = useState<ReminderConfig>(() => loadMovementConfig());
   const [permStatus, setPermStatus] = useState<PermissionStatus>(() =>
@@ -61,28 +63,47 @@ export function MovementReminderSettings({ onStartSession }: Props) {
   const [showBanner, setShowBanner] = useState(false);
   const [snoozeUntil, setSnoozeUntil] = useState<Date | null>(null);
 
-  // Register in-app banner callback once
   useEffect(() => {
     reminderService.setBannerCallback(() => setShowBanner(true));
     return () => reminderService.setBannerCallback(() => {});
   }, []);
 
-  // Persist config and update scheduler whenever it changes
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const status = await reminderService.refreshPermission();
+      if (cancelled) return;
+      setPermStatus(status);
+      if (nativeApp && status === "denied") {
+        setConfig((prev) => (prev.enabled ? { ...prev, enabled: false } : prev));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [nativeApp]);
+
   useEffect(() => {
     saveMovementConfig(config);
-    if (config.enabled && permStatus === "granted") {
-      const lang = document.documentElement.lang || "en";
-      const typeKey = `profile.movement.type.${config.type}` as const;
-      const durKey = `profile.movement.dur.${config.duration}` as const;
-      reminderService.scheduleReminder(config, {
-        title: t("reminder.banner.title"),
-        body: t("reminder.banner.body")
-          .replace("{duration}", String(config.duration))
-          .replace("{type}", t(typeKey as Parameters<typeof t>[0])),
-      });
-    } else {
-      reminderService.cancelReminder();
-    }
+    let cancelled = false;
+    void (async () => {
+      if (config.enabled && permStatus === "granted") {
+        const scheduled = await reminderService.scheduleReminder(
+          config,
+          movementReminderCopy(config, t),
+        );
+        if (!cancelled && !scheduled) {
+          const status = await reminderService.refreshPermission();
+          setPermStatus(status);
+          setConfig((prev) => (prev.enabled ? { ...prev, enabled: false } : prev));
+        }
+      } else {
+        await reminderService.cancelReminder();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [config, permStatus, t]);
 
   const update = useCallback((patch: Partial<ReminderConfig>) => {
@@ -90,29 +111,30 @@ export function MovementReminderSettings({ onStartSession }: Props) {
   }, []);
 
   const handleToggleEnable = async () => {
-    if (!config.enabled) {
-      // Requesting permission only on user gesture
-      const status = await reminderService.requestPermission();
-      setPermStatus(status);
+    if (config.enabled) {
+      update({ enabled: false });
+      return;
     }
-    update({ enabled: !config.enabled });
+    const status = await reminderService.requestPermission();
+    setPermStatus(status);
+    if (status !== "granted") {
+      update({ enabled: false });
+      return;
+    }
+    update({ enabled: true });
   };
 
   const handleTestNotification = async () => {
     const status = await reminderService.requestPermission();
     setPermStatus(status);
     if (status === "denied" || status === "unsupported") {
+      if (config.enabled) update({ enabled: false });
       setTestStatus("failed");
       setTimeout(() => setTestStatus("idle"), 3000);
       return;
     }
     try {
-      await reminderService.showTestNotification({
-        title: t("reminder.banner.title"),
-        body: t("reminder.banner.body")
-          .replace("{duration}", String(config.duration))
-          .replace("{type}", t(`profile.movement.type.${config.type}` as Parameters<typeof t>[0])),
-      });
+      await reminderService.showTestNotification(movementReminderCopy(config, t));
       setTestStatus("sent");
     } catch {
       setTestStatus("failed");
@@ -128,12 +150,7 @@ export function MovementReminderSettings({ onStartSession }: Props) {
   };
 
   const handleSnooze = () => {
-    const fireAt = reminderService.snoozeReminder({
-      title: t("reminder.banner.title"),
-      body: t("reminder.banner.body")
-        .replace("{duration}", String(config.duration))
-        .replace("{type}", t(`profile.movement.type.${config.type}` as Parameters<typeof t>[0])),
-    });
+    const fireAt = reminderService.snoozeReminder(movementReminderCopy(config, t));
     setSnoozeUntil(fireAt);
     setShowBanner(false);
   };
@@ -252,7 +269,9 @@ export function MovementReminderSettings({ onStartSession }: Props) {
         {permStatus === "denied" && (
           <div className="flex gap-2 bg-[#2D2420] rounded-xl p-3 mb-3">
             <BellOff className="w-4 h-4 text-[#D4806A] shrink-0 mt-0.5" />
-            <p className="text-xs text-[#D4806A]">{t("profile.movement.denied")}</p>
+            <p className="text-xs text-[#D4806A]">
+              {t(nativeApp ? "profile.movement.deniedNative" : "profile.movement.denied")}
+            </p>
           </div>
         )}
 
@@ -382,7 +401,7 @@ export function MovementReminderSettings({ onStartSession }: Props) {
         >
           <Bell className="w-4 h-4" />
           {testStatus === "sent"
-            ? t("profile.movement.testSent")
+            ? t(nativeApp ? "profile.movement.testScheduled" : "profile.movement.testSent")
             : testStatus === "failed"
             ? t("profile.movement.testFailed")
             : t("profile.movement.test")}
@@ -398,7 +417,7 @@ export function MovementReminderSettings({ onStartSession }: Props) {
         <div className="flex gap-2 mt-3">
           <Info className="w-3.5 h-3.5 text-[#4D5D45] shrink-0 mt-0.5" />
           <p className="text-[11px] text-[#4D5D45] leading-relaxed">
-            {t("reminder.banner.background")}
+          {t(nativeApp ? "reminder.banner.backgroundNative" : "reminder.banner.background")}
           </p>
         </div>
       </div>

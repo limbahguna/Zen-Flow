@@ -3,10 +3,7 @@ import { ArrowLeft, Trash2, Shield, AlertTriangle, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
-
-// ── API base URL — same pattern as coach.tsx ──────────────────────────────────
-const _rawBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
-const API_BASE = _rawBase ? _rawBase.replace(/\/$/, "") : "";
+import { appApiUrl } from "@/lib/apiRuntime";
 
 type DialogStep = null | "confirm1" | "confirm2" | "deleting" | "error";
 
@@ -64,7 +61,7 @@ export default function DeleteAccountPage() {
     setErrorMsg(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/account`, {
+      const res = await fetch(appApiUrl("/api/account"), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${session.access_token}` },
       });

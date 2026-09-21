@@ -23,6 +23,9 @@ import { useToast } from "@/hooks/use-toast";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { OnboardingFlow, onboardingCompleted } from "@/components/OnboardingFlow";
 import WeeklyReportCard from "@/components/WeeklyReportCard";
+import { DashboardProgramCard } from "@/components/programs/DashboardProgramCard";
+import { DashboardProgressCard } from "@/components/progress/DashboardProgressCard";
+import { useAdaptiveDailyInsight } from "@/hooks/useAdaptiveDailyInsight";
 import { useTasks } from "@/hooks/useTasks";
 import { useAnxietyChecks } from "@/hooks/useAnxietyChecks";
 import { useLessons } from "@/hooks/useLessons";
@@ -32,6 +35,11 @@ import { IntentionForm } from "@/components/IntentionForm";
 import { scheduleIntentionReminder } from "@/lib/intentionNotifications";
 import type { IntentionInput } from "@/lib/intentions";
 import { categoryMeta, type LessonRow } from "@/lib/lessons";
+import {
+  dailyInsightReasonCopy,
+} from "@/lib/wellness/dailyInsightSelection";
+import { getProgram } from "@/lib/wellness/programCatalog";
+import { isProgramSlug } from "@/lib/wellness/types";
 import {
   todayRatio, tasksCreatedToday, tasksCompletedToday,
   currentStreak, avgAnxietyToday, weeklyTrend, moodTrend, moodDirection,
@@ -175,6 +183,7 @@ export default function DashboardPage() {
     isFetching: lessonsFetching,
     isSuccess: lessonsSuccess,
   } = useLessons();
+  const insightRecommendation = useAdaptiveDailyInsight();
   const { data: journalEntries } = useJournal();
   const { data: intentions = [] } = useIntentions();
   const intentionActions = useIntentionActions();
@@ -392,7 +401,7 @@ export default function DashboardPage() {
 
   // today's lesson (rotate by day of year)
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  const todaysLesson = lessons && lessons.length > 0 ? lessons[dayOfYear % lessons.length] : null;
+  const todaysLesson = insightRecommendation.lesson;
 
   // Translated mood label for current daily mood
   const moodFace = MOOD_FACE_KEYS.find(m => m.storageLabel === dailyMood);
@@ -689,6 +698,7 @@ export default function DashboardPage() {
             <button
               type="button"
               data-testid="todays-lesson-card"
+              aria-describedby="todays-lesson-reason"
               onClick={() => setActivLesson(todaysLesson)}
               className="w-full text-left flex items-center gap-3.5 rounded-2xl border border-[#2D3A2E] p-4 hover:border-[#3D4D35] transition-colors duration-200"
               style={{ background: "linear-gradient(135deg, #222822 0%, #1E241E 100%)" }}
@@ -706,11 +716,28 @@ export default function DashboardPage() {
                 <h3 className="font-bold text-[#E8EDE3] leading-snug" style={{ fontSize: "14px" }}>
                   {todaysLesson.title}
                 </h3>
+                <p
+                  className="mt-1 text-xs leading-snug text-[#A3B197]"
+                  data-testid="todays-lesson-reason"
+                  id="todays-lesson-reason"
+                >
+                  {dailyInsightReasonCopy(language, insightRecommendation.reasonKey, {
+                    program: insightRecommendation.programSlug && isProgramSlug(insightRecommendation.programSlug)
+                      ? t(getProgram(insightRecommendation.programSlug).titleKey)
+                      : undefined,
+                    goal: insightRecommendation.primaryGoal
+                      ? t(`programs.goal.${insightRecommendation.primaryGoal}`)
+                      : undefined,
+                  })}
+                </p>
               </div>
               <ChevronRight className="w-4 h-4 text-[#7A8A72] shrink-0" />
             </button>
           );
         })()}
+
+        <DashboardProgramCard />
+        <DashboardProgressCard />
 
         {/* ── Daily Motivation ───────────────────────────────────────── */}
         <DailyMotivation />

@@ -17,10 +17,14 @@ import DeleteAccountPage from "@/pages/delete-account";
 import TermsPage from "@/pages/terms";
 import CrisisPage from "@/pages/crisis";
 import { CoachProvider } from "@/context/CoachContext";
-import { LanguageProvider } from "@/context/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/context/LanguageContext";
 import FocusPage from "@/pages/focus";
 import SetupPage from "@/pages/setup";
 import PlansPage from "@/pages/plans";
+import ProgramsPage from "@/pages/programs";
+import ProgramDetailPage from "@/pages/program-detail";
+import DailyPlanPage from "@/pages/daily-plan";
+import ProgressPage from "@/pages/progress";
 import ResetPasswordPage from "@/pages/reset-password";
 import { SetupRoute } from "@/components/ProtectedRoute";
 import { LanguageProfileSync } from "@/components/LanguageProfileSync";
@@ -28,6 +32,9 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 import { Capacitor } from "@capacitor/core";
 import { useIntentions } from "@/hooks/useIntentions";
 import { clearDeviceIntentionNotifications, intentionPathFromNotificationExtra, scheduleIntentionReminder } from "@/lib/intentionNotifications";
+import { ensureMindfulReminderChannel } from "@/lib/localReminderNotifications";
+import { scheduleMovementReminder } from "@/lib/movementNotifications";
+import { loadMovementConfig, movementReminderCopy } from "@/services/reminderService";
 
 function NotificationNavigation() {
   const [, setLocation] = useLocation();
@@ -52,6 +59,7 @@ function IntentionNotificationSync() {
     if (!Capacitor.isNativePlatform()) return;
     const ownedIntentions = [...data];
     void (async () => {
+      await ensureMindfulReminderChannel();
       await clearDeviceIntentionNotifications();
       if (!user?.id) return;
       await Promise.all(
@@ -64,6 +72,22 @@ function IntentionNotificationSync() {
       void clearDeviceIntentionNotifications();
     };
   }, [user?.id, fingerprint]);
+
+  return null;
+}
+
+function MovementNotificationSync() {
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const config = loadMovementConfig();
+    void (async () => {
+      await ensureMindfulReminderChannel();
+      if (!config.enabled) return;
+      await scheduleMovementReminder(config, movementReminderCopy(config, t), false);
+    })();
+  }, [t]);
 
   return null;
 }
@@ -128,6 +152,26 @@ function Router() {
           <PlansPage />
         </ProtectedRoute>
       </Route>
+      <Route path="/programs/:slug">
+        <ProtectedRoute>
+          <ProgramDetailPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/programs">
+        <ProtectedRoute>
+          <ProgramsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/daily-plan">
+        <ProtectedRoute>
+          <DailyPlanPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/progress">
+        <ProtectedRoute>
+          <ProgressPage />
+        </ProtectedRoute>
+      </Route>
       <Route path="/focus">
         <ProtectedRoute>
           <FocusPage />
@@ -163,6 +207,7 @@ function UserScopedApplication() {
         <div className="app-shell">
           <LanguageProfileSync />
           <IntentionNotificationSync />
+          <MovementNotificationSync />
           <CoachProvider key={userId ?? "signed-out"} userId={userId}>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <NotificationNavigation />

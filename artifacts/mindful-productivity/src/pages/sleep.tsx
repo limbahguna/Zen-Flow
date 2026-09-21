@@ -39,7 +39,10 @@ export default function SleepPage() {
       <header className="sticky top-0 z-10 bg-[#070A10]/90 backdrop-blur-md border-b border-[#1C263A]">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-3">
           <button
-            onClick={() => setLocation("/dashboard")}
+            onClick={() => {
+              const fromDailyPlan = new URLSearchParams(window.location.search).get("from") === "daily-plan";
+              setLocation(fromDailyPlan ? "/daily-plan" : "/dashboard");
+            }}
             className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-[#8FA6C8] hover:bg-[#121722] transition-colors"
             aria-label={t("sleep.backToDashboard")}
             data-testid="sleep-back"

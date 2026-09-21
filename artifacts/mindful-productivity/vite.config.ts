@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { resolveBuildTimeApiBaseUrl } from "./src/lib/apiBaseUrl";
 
 // PORT is only required when running the dev/preview server.
 // During `vite build`, PORT is never read so the build works without env vars.
@@ -13,19 +14,21 @@ export default defineConfig(async ({ command, mode }) => {
   const root = path.resolve(import.meta.dirname);
   const buildEnv = loadEnv(mode, root, "");
 
+  const resolvedApiBaseUrl = resolveBuildTimeApiBaseUrl({
+    command,
+    mode,
+    envValue: process.env.VITE_API_BASE_URL || buildEnv.VITE_API_BASE_URL,
+  });
+  process.env.VITE_API_BASE_URL = resolvedApiBaseUrl;
+
   if (isBuild && mode === "android") {
-    const apiBaseUrl = process.env.VITE_API_BASE_URL || buildEnv.VITE_API_BASE_URL;
     const supabaseProjectUrl = process.env.VITE_SUPABASE_URL || buildEnv.VITE_SUPABASE_URL;
     const supabaseAnonKey =
       process.env.VITE_SUPABASE_ANON_KEY || buildEnv.VITE_SUPABASE_ANON_KEY;
-    if (!apiBaseUrl || !supabaseProjectUrl) {
+    if (!supabaseProjectUrl) {
       throw new Error("Android builds require API and Supabase project URLs.");
     }
-    const apiUrl = new URL(apiBaseUrl);
     const supabaseUrl = new URL(supabaseProjectUrl);
-    if (apiUrl.origin !== "https://getmindfulspace.com") {
-      throw new Error("Android builds require the canonical HTTPS API origin.");
-    }
     if (
       supabaseUrl.protocol !== "https:" ||
       !supabaseUrl.hostname.endsWith(".supabase.co") ||
@@ -109,6 +112,9 @@ export default defineConfig(async ({ command, mode }) => {
       dedupe: ["react", "react-dom"],
     },
     root,
+    define: {
+      "import.meta.env.VITE_API_BASE_URL": JSON.stringify(resolvedApiBaseUrl),
+    },
     build: {
       outDir: path.resolve(import.meta.dirname, "dist/public"),
       emptyOutDir: true,

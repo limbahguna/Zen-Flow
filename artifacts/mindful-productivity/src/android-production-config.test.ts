@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  CANONICAL_PRODUCTION_API_ORIGIN,
+  resolveBuildTimeApiBaseUrl,
+} from "./lib/apiBaseUrl";
 
 const root = path.resolve(import.meta.dirname, "..");
 const read = (relativePath: string) =>
@@ -8,17 +12,18 @@ const read = (relativePath: string) =>
 
 describe("Android production connectivity configuration", () => {
   it("builds against canonical HTTPS services only", () => {
-    const androidEnv = read(".env.android");
     const viteConfig = read("vite.config.ts");
 
-    expect(androidEnv).toContain(
-      "VITE_API_BASE_URL=https://getmindfulspace.com",
-    );
-    expect(androidEnv).not.toContain("replit.app");
-    expect(viteConfig).toContain(
-      'apiUrl.origin !== "https://getmindfulspace.com"',
-    );
-    expect(viteConfig).toContain('supabaseUrl.protocol !== "https:"');
+    expect(viteConfig).toContain("resolveBuildTimeApiBaseUrl");
+    expect(viteConfig).toContain("import.meta.env.VITE_API_BASE_URL");
+    expect(viteConfig).toContain("supabaseUrl.protocol !== \"https:\"");
+    expect(
+      resolveBuildTimeApiBaseUrl({
+        command: "build",
+        mode: "android",
+        envValue: "http://localhost:8080",
+      }),
+    ).toBe(CANONICAL_PRODUCTION_API_ORIGIN);
   });
 
   it("keeps cleartext disabled and native origins allowed by CORS", () => {
