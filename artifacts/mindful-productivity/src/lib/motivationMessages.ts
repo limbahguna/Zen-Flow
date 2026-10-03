@@ -185,7 +185,7 @@ export const MOTIVATION_MESSAGES: MotivationMessage[] = [
     id: 13,
     text: {
       en: "You are doing the best you can with what you have.",
-      id: "Kamu melakukan yang terbaik yang bisa kamu lakukan dengan apa yang kamu miliki.",
+      id: "Kamu sudah melakukan yang terbaik dengan apa yang kamu punya.",
       es: "Estás haciendo lo mejor que puedes con lo que tienes.",
       de: "Du tust das Beste, was du mit dem kannst, was du hast.",
       ja: "今持っているものでできる最善を尽くしています。",

@@ -1,0 +1,60 @@
+# Keep secrets, local state and platform artifacts out of the build context.
+
+.git
+.gitignore
+.github
+
+node_modules
+**/node_modules
+.pnpm-store
+
+dist
+**/dist
+build
+**/build
+out-tsc
+*.tsbuildinfo
+.turbo
+.vite
+.parcel-cache
+
+.env
+.env.*
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# Android / mobile native output is never part of the server image
+artifacts/mindful-productivity/android
+artifacts/mobile/android
+artifacts/mobile/ios
+.gradle
+.cxx
+*.apk
+*.aab
+exports/
+
+# Local tooling and editor state
+.vscode
+.idea
+.cursor
+coverage
+*.log
+Thumbs.db
+.DS_Store
+
+# Replit-only directories
+.cache/
+.local/
+.agents/
+.config/
+attached_assets/
+
+# Deployment docs and configs are not needed inside the image
+docs
+deploy
+Dockerfile
+docker-compose.yml
+.dockerignore

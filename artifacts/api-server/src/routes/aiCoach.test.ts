@@ -392,16 +392,16 @@ describe("reportable response provenance", () => {
 });
 
 // ── 7. Security: RPC must be called with NO arguments ─────────────────────────
-// The SQL function (coach_increment_usage) takes NO parameters.
-// The daily limit is a CONSTANT inside the SQL — callers cannot override it.
+// Monthly status and the success recorder take NO parameters.
+// The limit is a CONSTANT inside the SQL — callers cannot override it.
 // user_id is read from auth.uid() (verified JWT) inside the function.
 // Sending any argument (p_user_id OR p_max_daily) would be a security regression.
 describe("security: RPC called with no arguments", () => {
-  it("calls coach_increment_usage with NO second argument — not even p_max_daily", async () => {
+  it("calls the monthly coach functions with NO second argument", async () => {
     setProviderEnv();
     mockSuccessfulAI();
 
-    let capturedRpcName: string | undefined;
+    const capturedRpcNames: string[] = [];
     let capturedRpcSecondArg: unknown = "NOT_SET"; // sentinel — distinct from undefined
 
     const { createClient } = await import("@supabase/supabase-js");
@@ -413,7 +413,7 @@ describe("security: RPC called with no arguments", () => {
         })),
       },
       rpc: vi.fn(async (fn: string, args?: unknown) => {
-        capturedRpcName = fn;
+        capturedRpcNames.push(fn);
         capturedRpcSecondArg = args; // undefined when called with no second arg
         return { data: 1, error: null };
       }),
@@ -427,7 +427,10 @@ describe("security: RPC called with no arguments", () => {
     expect([200, 502]).toContain(res.status);
 
     // Correct function name
-    expect(capturedRpcName).toBe("coach_increment_usage");
+    expect(capturedRpcNames).toEqual([
+      "coach_monthly_status",
+      "coach_record_successful_message",
+    ]);
 
     // CRITICAL: no second argument — the SQL function accepts none.
     // undefined means the caller did NOT pass p_user_id or p_max_daily.
@@ -507,13 +510,9 @@ describe("rate limit blocks provider call", () => {
   });
 });
 
-// ── 9. Quota behaviour: failing provider still consumes quota (MVP design) ─────
-// The counter is incremented BEFORE the AI provider is called.
-// A request that fails at the AI step still consumes one unit of daily quota.
-// This is intentional — there is no refund mechanism. Tests verify this invariant
-// so future contributors do not accidentally add misleading "quota refund" logic.
+// ── 9. Quota behaviour: a failed provider call does not consume a message ─────
 describe("quota behaviour", () => {
-  it("consumes quota even when the AI provider fails (no refund in MVP)", async () => {
+  it("does not record usage when the AI provider fails", async () => {
     setProviderEnv();
 
     // Provider will throw — quota should already be consumed by RPC increment
@@ -539,14 +538,76 @@ describe("quota behaviour", () => {
       .set("Authorization", "Bearer valid-token")
       .send({ history: VALID_HISTORY, context: VALID_CONTEXT });
 
-    // The provider failed → 502 to the user
     expect(res.status).toBe(502);
-
-    // BUT the RPC was called exactly once — quota was consumed before the failure
+    // Status was read once. The success recorder must not run.
     expect(rpcCallCount).toBe(1);
-
-    // No "remaining" or "refund" field on error responses — quota is gone
     expect(res.body).not.toHaveProperty("remaining");
+  });
+
+  it("stops at 10 successful messages and does not call the provider", async () => {
+    setProviderEnv();
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { createClient } = await import("@supabase/supabase-js");
+    vi.mocked(createClient).mockReturnValueOnce({
+      auth: {
+        getUser: vi.fn(async () => ({
+          data: { user: { id: "user-monthly-cap" } },
+          error: null,
+        })),
+      },
+      rpc: vi.fn(async (fn: string) => {
+        expect(fn).toBe("coach_monthly_status");
+        return {
+          data: { allowed: false, used: 10, remaining: 0, monthly_limit: 10, plan: "free" },
+          error: null,
+        };
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const res = await request
+      .post("/api/ai/coach")
+      .set("Authorization", "Bearer valid-token")
+      .send({ history: VALID_HISTORY, context: VALID_CONTEXT });
+
+    expect(res.status).toBe(429);
+    expect(res.body.remaining).toBe(0);
+    expect(res.body.monthlyLimit).toBe(10);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("records only the successful reply and returns the remaining monthly count", async () => {
+    setProviderEnv();
+    mockSuccessfulAI();
+    const calls: string[] = [];
+    const { createClient } = await import("@supabase/supabase-js");
+    vi.mocked(createClient).mockReturnValueOnce({
+      auth: {
+        getUser: vi.fn(async () => ({
+          data: { user: { id: "user-one-success" } },
+          error: null,
+        })),
+      },
+      rpc: vi.fn(async (fn: string) => {
+        calls.push(fn);
+        if (fn === "coach_monthly_status") {
+          return { data: { allowed: true, used: 9, remaining: 1, monthly_limit: 10, plan: "free" }, error: null };
+        }
+        return { data: { allowed: true, used: 10, remaining: 0, monthly_limit: 10, plan: "free" }, error: null };
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const res = await request
+      .post("/api/ai/coach")
+      .set("Authorization", "Bearer valid-token")
+      .send({ history: VALID_HISTORY, context: VALID_CONTEXT });
+
+    expect(res.status).toBe(200);
+    expect(calls).toEqual(["coach_monthly_status", "coach_record_successful_message"]);
+    expect(res.body.remaining).toBe(0);
+    expect(res.body.used).toBe(10);
+    expect(res.body.monthlyLimit).toBe(10);
   });
 
   it("unauthenticated request is rejected before quota is touched", async () => {

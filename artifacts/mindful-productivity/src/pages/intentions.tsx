@@ -6,11 +6,12 @@ import { cancelIntentionReminder, scheduleIntentionReminder } from "@/lib/intent
 import type { Intention, IntentionInput, IntentionStatus } from "@/lib/intentions";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { takeBlankIntentionRequest } from "@/lib/intentionSeed";
 
 const COPY = {
   en: { active:"Active intentions", history:"History", empty:"Set a gentle intention and choose one small next step.", add:"New intention", done:"Mark done", postpone:"Postpone", edit:"Edit reminder", letGo:"Let it go", statuses:{active:"Active",done:"Done",postponed:"Postponed",let_go:"Let go"} },
   id: { active:"Niat aktif", history:"Riwayat", empty:"Tetapkan niat yang lembut dan pilih satu langkah kecil.", add:"Niat baru", done:"Tandai selesai", postpone:"Tunda", edit:"Ubah pengingat", letGo:"Lepaskan", statuses:{active:"Aktif",done:"Selesai",postponed:"Ditunda",let_go:"Dilepas"} },
-  ja: { active:"進行中のインテンション", history:"履歴", empty:"やさしいインテンションと小さな一歩を設定しましょう。", add:"新しいインテンション", done:"完了", postpone:"延期", edit:"リマインダー編集", letGo:"手放す", statuses:{active:"進行中",done:"完了",postponed:"延期",let_go:"手放した"} },
+  ja: { active:"進行中の目標", history:"履歴", empty:"やさしい目標と、次の小さな一歩を決めましょう。", add:"新しい目標", done:"完了", postpone:"延期", edit:"リマインダーを編集", letGo:"手放す", statuses:{active:"進行中",done:"完了",postponed:"延期",let_go:"手放した"} },
 };
 
 function ReminderSummary({ intention }: { intention: Intention }) {
@@ -26,6 +27,7 @@ export default function IntentionsPage() {
   const actions = useIntentionActions();
   const [editing, setEditing] = useState<Intention | null>(null);
   const [creating, setCreating] = useState(false);
+  const [promptForAction, setPromptForAction] = useState(false);
   const active = useMemo(() => data.filter((item) => item.status === "active"), [data]);
   const history = useMemo(() => data.filter((item) => item.status !== "active"), [data]);
 
@@ -33,6 +35,12 @@ export default function IntentionsPage() {
     const id = new URLSearchParams(window.location.search).get("intention");
     if (id) requestAnimationFrame(() => document.getElementById(`intention-${id}`)?.scrollIntoView({ behavior:"smooth", block:"center" }));
   }, [data]);
+
+  useEffect(() => {
+    if (!takeBlankIntentionRequest()) return;
+    setPromptForAction(true);
+    setCreating(true);
+  }, []);
 
   async function setStatus(intention: Intention, status: IntentionStatus) {
     const postponedUntil = status === "postponed"
@@ -103,7 +111,7 @@ export default function IntentionsPage() {
     <div className="space-y-3">{active.map((item) => <Card key={item.id} intention={item}/>)}</div>
     {history.length > 0 && <section className="space-y-3"><h2 className="font-heading text-lg text-[#C8D5B9]">{c.history}</h2>
       {history.map((item) => <Card key={item.id} intention={item} historical/>)}</section>}
-    {(creating || editing) && <IntentionForm initial={editing ?? undefined} onClose={() => { setCreating(false); setEditing(null); }} onSave={save}
+    {(creating || editing) && <IntentionForm initial={editing ?? undefined} promptForAction={promptForAction && !editing} onClose={() => { setCreating(false); setEditing(null); setPromptForAction(false); }} onSave={save}
       saving={actions.create.isPending || actions.update.isPending}/>}
   </main>;
 }

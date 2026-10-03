@@ -1,0 +1,45 @@
+# Zen-Flow production stack for a Hostinger VPS.
+#
+# One service runs the Express API and serves the compiled Vite frontend.
+# Runtime secrets come from ./.env on the VPS (git-ignored, never baked into
+# the image). Public Supabase values are build args because Vite inlines them
+# into the browser bundle at build time.
+#
+# The container is published on 127.0.0.1 only; nginx terminates TLS and proxies
+# to it. See deploy/nginx/zen-flow.conf.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    image: zen-flow-app:latest
+    container_name: zen-flow-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "127.0.0.1:${HOST_PORT:-3000}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

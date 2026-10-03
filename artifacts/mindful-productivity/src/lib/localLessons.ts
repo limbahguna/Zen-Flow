@@ -457,12 +457,12 @@ const LOCAL_LESSON_DEFS: LocalLessonDef[] = [
           "Instead of 'I want to run,' try 'I am someone who moves their body.' Goals change behavior temporarily. Identity changes it permanently.",
       },
       id: {
-        title: "Tujuan berbasis identitas",
+        title: "Tujuan yang mencerminkan dirimu",
         content:
           "Alih-alih 'Saya ingin berlari,' coba 'Saya adalah seseorang yang menggerakkan tubuhnya.' Tujuan mengubah perilaku sementara. Identitas mengubahnya secara permanen.",
       },
       ja: {
-        title: "アイデンティティベースの目標",
+        title: "自分らしさに沿った目標",
         content:
           "「走りたい」ではなく「私は体を動かす人間だ」と言ってみましょう。目標は行動を一時的に変えます。アイデンティティは永続的に変えます。",
       },
@@ -512,7 +512,7 @@ const LOCAL_LESSON_DEFS: LocalLessonDef[] = [
       ja: {
         title: "習慣のスタッキング",
         content:
-          "新しい習慣を既存のものに紐付けましょう。「朝のコーヒーを注いだ後、一つの意図を書く。」既存の習慣が新しいものへのトリガーになります。",
+          "新しい習慣を、すでにある習慣のあとに続けましょう。「朝のコーヒーを注いだあと、目標を一つ書く。」すでにある習慣が、新しい習慣のはじまりになります。",
       },
     },
   },

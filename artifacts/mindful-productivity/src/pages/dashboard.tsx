@@ -21,6 +21,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { SoftLaunchNotice } from "@/components/SoftLaunchNotice";
 import { OnboardingFlow, onboardingCompleted } from "@/components/OnboardingFlow";
 import WeeklyReportCard from "@/components/WeeklyReportCard";
 import { DashboardProgramCard } from "@/components/programs/DashboardProgramCard";
@@ -302,7 +303,7 @@ export default function DashboardPage() {
         });
         toast({
           title: language === "id" ? "Pengingat tidak diaktifkan" : language === "ja" ? "リマインダーはオフです" : "Reminder not enabled",
-          description: language === "id" ? "Niat tersimpan tanpa pengingat. Izin notifikasi dapat diaktifkan nanti." : language === "ja" ? "インテンションはリマインダーなしで保存されました。" : "Your intention was saved without a reminder. You can enable notification permission later.",
+          description: language === "id" ? "Niat tersimpan tanpa pengingat. Izin notifikasi dapat diaktifkan nanti." : language === "ja" ? "目標はリマインダーなしで保存されました。" : "Your intention was saved without a reminder. You can enable notification permission later.",
         });
       }
     }
@@ -527,6 +528,7 @@ export default function DashboardPage() {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 pt-5 space-y-5">
+        <SoftLaunchNotice userId={user?.id ?? ""} />
         {activeIntention && (
           <button
             type="button"

@@ -1,5 +1,46 @@
 import supabase from "@/lib/supabase";
 
+/**
+ * A headline insight as a translation key plus its placeholder values, so the
+ * sentence is rendered in the user's language instead of being built in English.
+ */
+export interface WeeklyInsight {
+  key: string;
+  values: Record<string, string | number>;
+}
+
+export interface WeeklyInsightInput {
+  /** anxiety_checks intensity: LOWER is better, so a positive change is relief. */
+  moodChange: number | null;
+  completionRate: number;
+  /** journal mood: HIGHER is better, so a positive average is an improvement. */
+  avgMoodImprovement: number | null;
+  currentStreak: number;
+  breathingSessions: number;
+}
+
+/** Pure insight selection, kept separate from Supabase so it can be tested directly. */
+export function selectWeeklyInsight(input: WeeklyInsightInput): WeeklyInsight {
+  const { moodChange, completionRate, avgMoodImprovement, currentStreak, breathingSessions } = input;
+
+  if (moodChange !== null && moodChange > 0.5) {
+    return { key: "weekly.insight.anxietyDown", values: { value: moodChange.toFixed(1) } };
+  }
+  if (completionRate >= 60) {
+    return { key: "weekly.insight.intentions", values: { rate: completionRate } };
+  }
+  if (avgMoodImprovement !== null && avgMoodImprovement > 1) {
+    return { key: "weekly.insight.journalMood", values: { value: avgMoodImprovement.toFixed(1) } };
+  }
+  if (currentStreak >= 3) {
+    return { key: "weekly.insight.streak", values: { count: currentStreak } };
+  }
+  if (breathingSessions >= 3) {
+    return { key: "weekly.insight.breathing", values: { count: breathingSessions } };
+  }
+  return { key: "weekly.insight.default", values: {} };
+}
+
 export interface WeeklyReportData {
   hasEnoughData: boolean;
   weekStart: string;
@@ -14,7 +55,7 @@ export interface WeeklyReportData {
   avgMoodImprovement: number | null;
   breathingSessions: number;
   currentStreak: number;
-  topInsight: string;
+  topInsight: WeeklyInsight;
 }
 
 export async function getWeeklyReport(userId: string): Promise<WeeklyReportData> {
@@ -111,20 +152,13 @@ export async function getWeeklyReport(userId: string): Promise<WeeklyReportData>
     }
   }
 
-  let topInsight = "";
-  if (moodChange !== null && moodChange > 0.5) {
-    topInsight = `Your anxiety dropped by ${moodChange.toFixed(1)} points this week. Whatever you're doing, it's working.`;
-  } else if (completionRate >= 60) {
-    topInsight = `You completed ${completionRate}% of your intentions this week. That's real follow-through.`;
-  } else if (avgMoodImprovement !== null && avgMoodImprovement > 1) {
-    topInsight = `Your journal entries show your mood improves by ${avgMoodImprovement.toFixed(1)} points after reframing. CBT is working for you.`;
-  } else if (currentStreak >= 3) {
-    topInsight = `${currentStreak} days in a row. You're building a real habit.`;
-  } else if (breathingSessions >= 3) {
-    topInsight = `${breathingSessions} breathing sessions this week. Each one is a small act of self-care.`;
-  } else {
-    topInsight = "Every check-in counts. Keep showing up for yourself.";
-  }
+  const topInsight = selectWeeklyInsight({
+    moodChange,
+    completionRate,
+    avgMoodImprovement,
+    currentStreak,
+    breathingSessions,
+  });
 
   const hasEnoughData =
     (moodChecks?.length ?? 0) + intentionsCreated + journalCount + breathingSessions >= 3;

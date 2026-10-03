@@ -9,18 +9,24 @@ const COPY = {
     reminder: "Reminder", off: "Off", morning: "Morning", evening: "Evening", custom: "Custom time",
     frequency: "Frequency", once: "Once", daily: "Daily", days: "Selected days",
     save: "Save intention", close: "Close", dayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    hint: "Choose one small action you can take next.",
+    titlePlaceholder: "One small action",
   },
   id: {
     title: "Judul niat", why: "Mengapa ini penting (opsional)", action: "Langkah kecil hari ini",
     reminder: "Pengingat", off: "Mati", morning: "Pagi", evening: "Malam", custom: "Waktu khusus",
     frequency: "Frekuensi", once: "Sekali", daily: "Setiap hari", days: "Hari pilihan",
     save: "Simpan niat", close: "Tutup", dayNames: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+    hint: "Pilih satu tindakan kecil yang bisa kamu lakukan berikutnya.",
+    titlePlaceholder: "Satu tindakan kecil",
   },
   ja: {
-    title: "インテンションのタイトル", why: "大切な理由（任意）", action: "今日の小さな一歩",
+    title: "目標のタイトル", why: "大切な理由（任意）", action: "今日の小さな一歩",
     reminder: "リマインダー", off: "オフ", morning: "朝", evening: "夜", custom: "時刻を指定",
     frequency: "頻度", once: "1回", daily: "毎日", days: "曜日を選択",
-    save: "インテンションを保存", close: "閉じる", dayNames: ["日", "月", "火", "水", "木", "金", "土"],
+    save: "目標を保存", close: "閉じる", dayNames: ["日", "月", "火", "水", "木", "金", "土"],
+    hint: "次にできる小さな行動を一つ選びましょう。",
+    titlePlaceholder: "小さな行動を一つ",
   },
 };
 
@@ -32,12 +38,15 @@ function defaultAction(title: string) {
 export function IntentionForm({
   initial,
   seedTitle = "",
+  promptForAction = false,
   onClose,
   onSave,
   saving,
 }: {
   initial?: Intention;
   seedTitle?: string;
+  /** Journal opens a blank form. The title is never filled from question 5. */
+  promptForAction?: boolean;
   onClose: () => void;
   onSave: (input: IntentionInput) => Promise<void>;
   saving?: boolean;
@@ -79,11 +88,16 @@ export function IntentionForm({
       >
         <div className="flex items-center justify-between">
           <h2 className="font-heading text-xl font-bold text-[#E8EDE3]">{c.save}</h2>
-          <button type="button" onClick={onClose} aria-label={c.close} className="text-[#7A8A72]"><X /></button>
+          <button type="button" onClick={onClose} aria-label={c.close} data-testid="button-close-intention" className="text-[#7A8A72]"><X /></button>
         </div>
+        {promptForAction && (
+          <p className="text-sm text-[#A3B197]" data-testid="intention-action-hint">{c.hint}</p>
+        )}
         <label className="block text-sm text-[#A3B197]">{c.title}
           <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160}
-            className="mt-1 w-full rounded-xl border border-[#2D3A2E] bg-[#1A1E1A] px-3 py-2.5 text-[#E8EDE3]" />
+            placeholder={promptForAction ? c.titlePlaceholder : undefined}
+            data-testid="intention-title"
+            className="mt-1 w-full rounded-xl border border-[#2D3A2E] bg-[#1A1E1A] px-3 py-2.5 text-[#E8EDE3] placeholder:text-[#7A8A72]" />
         </label>
         <label className="block text-sm text-[#A3B197]">{c.why}
           <textarea value={why} onChange={(e) => setWhy(e.target.value)} maxLength={600} rows={2}
@@ -91,6 +105,7 @@ export function IntentionForm({
         </label>
         <label className="block text-sm text-[#A3B197]">{c.action}
           <input value={action} onChange={(e) => setAction(e.target.value)} maxLength={240}
+            data-testid="intention-small-action"
             className="mt-1 w-full rounded-xl border border-[#2D3A2E] bg-[#1A1E1A] px-3 py-2.5 text-[#E8EDE3]" />
         </label>
         <fieldset><legend className="mb-2 text-sm text-[#A3B197]">{c.reminder}</legend>
@@ -114,7 +129,7 @@ export function IntentionForm({
         {frequency === "selected_days" && <div className="grid grid-cols-7 gap-1">{c.dayNames.map((name, day) =>
           <button type="button" key={name} onClick={() => setDays((current) => current.includes(day) ? current.filter((item) => item !== day) : [...current, day])}
             className={`rounded-lg py-2 text-xs ${days.includes(day) ? "bg-[#4A5D3E] text-white" : "bg-[#1A1E1A] text-[#7A8A72]"}`}>{name}</button>)}</div>}
-        <button type="submit" disabled={!valid || saving}
+        <button type="submit" disabled={!valid || saving} data-testid="button-confirm-intention"
           className="h-11 w-full rounded-xl bg-[#4A5D3E] font-medium text-[#E8EDE3] disabled:opacity-50">
           {saving ? "…" : c.save}
         </button>

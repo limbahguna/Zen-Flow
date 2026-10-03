@@ -5,6 +5,7 @@ import {
   requireSupabaseAuth,
 } from "../middlewares/supabaseAuth";
 import { logger } from "../lib/logger";
+import { monthlyRemaining, SOFT_LAUNCH_MONTHLY_LIMIT, sumMonthlyUsage, utcMonthStart } from "../lib/coachMonthlyLimit";
 
 const router = Router();
 
@@ -152,12 +153,31 @@ router.get("/subscription", async (req, res) => {
     }
   }
 
+  let usedThisMonth = 0;
+  if (client) {
+    try {
+      const month = await client
+        .from("coach_usage")
+        .select("usage_date, count")
+        .eq("user_id", userId)
+        .gte("usage_date", utcMonthStart());
+      if (!month.error && Array.isArray(month.data)) {
+        usedThisMonth = sumMonthlyUsage(month.data);
+      }
+    } catch {
+      usedThisMonth = 0;
+    }
+  }
+
   const dailyLimit = PLAN_LIMITS[activePlan];
   res.json({
     activePlan,
     dailyLimit,
     usedToday: Math.min(usedToday, dailyLimit),
     remainingToday: Math.max(0, dailyLimit - usedToday),
+    monthlyLimit: SOFT_LAUNCH_MONTHLY_LIMIT,
+    usedThisMonth,
+    remainingThisMonth: monthlyRemaining(usedThisMonth),
     selectedRegion: region,
     plans: PLAN_DEFINITIONS,
     billingAvailable: false,

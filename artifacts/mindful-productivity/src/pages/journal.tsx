@@ -3,10 +3,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, NotebookPen } from "lucide-react";
 import { JournalEntryForm } from "@/components/JournalEntryForm";
+import { JournalEntryDetail } from "@/components/JournalEntryDetail";
 import { useAuth } from "@/hooks/useAuth";
 import { useJournal } from "@/hooks/useJournal";
 import { useLanguage } from "@/context/LanguageContext";
 import type { JournalEntryRow } from "@/lib/journal";
+import { journalStreak } from "@/lib/journalStreak";
 
 function formatDate(iso: string, lang: string): string {
   try {
@@ -26,6 +28,8 @@ export default function JournalPage() {
   const queryClient = useQueryClient();
   const { data: entries, isLoading, isError, refetch } = useJournal();
   const [formOpen, setFormOpen] = useState(false);
+  const [openEntry, setOpenEntry] = useState<JournalEntryRow | null>(null);
+  const [editEntry, setEditEntry] = useState<JournalEntryRow | null>(null);
 
   const totalEntries = entries?.length ?? 0;
   const avgImprovement = useMemo(() => {
@@ -36,15 +40,10 @@ export default function JournalPage() {
     return Math.round((sum / valid.length) * 10) / 10;
   }, [entries]);
 
-  const journalStreak = useMemo(() => {
-    if (!entries || entries.length === 0) return 0;
-    const days = new Set(entries.map(e => e.created_at.slice(0, 10)));
-    let count = 0;
-    const d = new Date(); d.setHours(0, 0, 0, 0);
-    if (!days.has(d.toISOString().slice(0, 10))) d.setDate(d.getDate() - 1);
-    while (days.has(d.toISOString().slice(0, 10))) { count++; d.setDate(d.getDate() - 1); }
-    return count;
-  }, [entries]);
+  const streak = useMemo(
+    () => journalStreak((entries ?? []).map((e) => e.created_at)),
+    [entries],
+  );
 
   useEffect(() => {
     const flag = localStorage.getItem("journal_open_new");
@@ -54,9 +53,15 @@ export default function JournalPage() {
     }
   }, []);
 
-  const handleSaved = () => {
+  // Refetching the list also recomputes the patterns, mood summary and streak,
+  // since all three derive from the same query.
+  const handleSaved = (saved?: JournalEntryRow) => {
     queryClient.invalidateQueries({ queryKey: ["journal_entries", user?.id ?? ""] });
     setFormOpen(false);
+    const wasEditing = editEntry != null;
+    setEditEntry(null);
+    // After an edit, return to the detail view showing the updated row.
+    if (wasEditing && saved) setOpenEntry(saved);
   };
 
   return (
@@ -129,23 +134,30 @@ export default function JournalPage() {
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <p style={{ fontSize: 14, color: "#C8D5B9" }}>
-                    📝 {t("journal.patterns.entries").replace("{count}", String(totalEntries))}
+                    📝 {t("journal.patterns.entries", { count: totalEntries })}
                   </p>
-                  <p style={{ fontSize: 14, color: "#C8D5B9" }}>
-                    📈 {t("journal.patterns.avgShift")}{" "}
-                    <span style={{ color: avgImprovement >= 0 ? "#7AC47A" : "#D4806A", fontWeight: 500 }}>
-                      {avgImprovement >= 0 ? "+" : ""}{avgImprovement} {t("journal.patterns.points")}
-                    </span>{" "}
-                    {t("journal.patterns.afterReframe")}
+                  <p
+                    style={{ fontSize: 14, color: moodShiftColor(avgImprovement) }}
+                    data-testid="journal-patterns-mood"
+                  >
+                    📈 {t(moodShiftKey(avgImprovement), { value: Math.abs(avgImprovement) })}
                   </p>
-                  <p style={{ fontSize: 14, color: "#C8D5B9" }}>
-                    🔥 {t("journal.patterns.streak").replace("{count}", String(journalStreak))}
+                  <p style={{ fontSize: 14, color: "#C8D5B9" }} data-testid="journal-patterns-streak">
+                    🔥 {streak === 0
+                      ? t("journal.patterns.streakNone")
+                      : t("journal.patterns.streak", { count: streak })}
                   </p>
                 </div>
               </div>
             )}
             {entries.map((entry) => (
-              <JournalCard key={entry.id} entry={entry} language={language} t={t} />
+              <JournalCard
+                key={entry.id}
+                entry={entry}
+                language={language}
+                t={t}
+                onOpen={() => setOpenEntry(entry)}
+              />
             ))}
           </>
         )}
@@ -155,9 +167,40 @@ export default function JournalPage() {
         {formOpen && (
           <JournalEntryForm onClose={() => setFormOpen(false)} onSaved={handleSaved} />
         )}
+        {!formOpen && editEntry && (
+          <JournalEntryForm
+            entry={editEntry}
+            onClose={() => setEditEntry(null)}
+            onSaved={handleSaved}
+          />
+        )}
+        {!formOpen && !editEntry && openEntry && (
+          <JournalEntryDetail
+            entry={openEntry}
+            onClose={() => setOpenEntry(null)}
+            onEdit={() => setEditEntry(openEntry)}
+          />
+        )}
       </AnimatePresence>
     </motion.div>
   );
+}
+
+/**
+ * Journal mood runs 2 (Awful) → 10 (Great), so a positive average shift is an
+ * improvement and a negative one is not. Mirrors moodMessageKey in
+ * JournalEntryForm.tsx.
+ */
+function moodShiftKey(avgShift: number): string {
+  if (avgShift > 0) return "journal.patterns.moodUp";
+  if (avgShift < 0) return "journal.patterns.moodDown";
+  return "journal.patterns.moodSame";
+}
+
+function moodShiftColor(avgShift: number): string {
+  if (avgShift > 0) return "#7AC47A";
+  if (avgShift < 0) return "#D4806A";
+  return "#C8D5B9";
 }
 
 function moodBorderColor(moodValue: number | null): string | null {
@@ -167,14 +210,27 @@ function moodBorderColor(moodValue: number | null): string | null {
   return "#7AC47A";
 }
 
-function JournalCard({ entry, language, t }: { entry: JournalEntryRow; language: string; t: (key: string) => string }) {
+function JournalCard({
+  entry,
+  language,
+  t,
+  onOpen,
+}: {
+  entry: JournalEntryRow;
+  language: string;
+  t: (key: string) => string;
+  onOpen: () => void;
+}) {
   const headline = entry.reframed_thought || entry.trigger_thought || t("journal.empty.title");
   const tags = Array.isArray(entry.tags) ? entry.tags : [];
   const borderColor = moodBorderColor(entry.mood_after ?? entry.mood_before ?? null);
 
   return (
-    <div
-      className="bg-[#222822] rounded-2xl border border-[#2D3A2E] p-5"
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={t("journal.detail.open")}
+      className="w-full text-left bg-[#222822] rounded-2xl border border-[#2D3A2E] p-5 hover:border-[#3D4D35] transition-colors"
       style={borderColor ? { borderLeft: `3px solid ${borderColor}` } : undefined}
       data-testid={`journal-card-${entry.id}`}
     >
@@ -210,6 +266,6 @@ function JournalCard({ entry, language, t }: { entry: JournalEntryRow; language:
           ))}
         </div>
       )}
-    </div>
+    </button>
   );
 }

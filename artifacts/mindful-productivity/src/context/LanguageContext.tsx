@@ -28,8 +28,8 @@ import {
 interface LanguageContextType {
   language: LanguageCode;
   setLanguage: (lang: LanguageCode) => void;
-  /** Translate a UI key in the currently active language. */
-  t: (key: string) => string;
+  /** Translate a UI key in the currently active language, filling any {placeholders}. */
+  t: (key: string, values?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -53,8 +53,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Plain function — closes over `language` from the current render,
   // so consumers always call t() with the latest language value.
-  function t(key: string): string {
-    return translate(language, key);
+  function t(key: string, values?: Record<string, string | number>): string {
+    return translate(language, key, values);
   }
 
   // Inline value object: new reference every render → all consumers

@@ -233,17 +233,41 @@ function supabaseProjectRef(): string {
 //   Authorization header. This is the only way the function learns who the
 //   caller is; it cannot be overridden from application code.
 //
-// Quota behaviour (MVP):
-//   The counter is incremented BEFORE the AI provider is called (step 6 before
-//   step 8 in the handler). A request that subsequently fails at the provider
-//   still consumes one unit of daily quota. There is NO refund mechanism.
-//   This is intentional: prevents abuse via deliberate provider failures and
-//   keeps the logic simple. Tests verify this invariant explicitly.
+// Quota behaviour (soft launch):
+//   Step 6 reads coach_monthly_status and does not write.
+//   A provider failure returns 502 and does not record usage.
+//   coach_record_successful_message runs only after a successful reply.
+//   The monthly limit (10) and user_id live inside the SQL functions.
 //
 // Returns plan and quota data from the SQL function. A numeric response remains
 // supported for older test fixtures and pre-entitlement databases.
 async function persistentCheckAndIncrement(
   supabase: ReturnType<typeof createClient>,
+): Promise<{
+  allowed: boolean;
+  remaining: number;
+  used: number;
+  dailyLimit: number;
+  plan: "free" | "plus" | "pro";
+}> {
+  return readCoachQuota(supabase, "coach_monthly_status");
+}
+
+async function recordSuccessfulCoachMessage(
+  supabase: ReturnType<typeof createClient>,
+): Promise<{
+  allowed: boolean;
+  remaining: number;
+  used: number;
+  dailyLimit: number;
+  plan: "free" | "plus" | "pro";
+}> {
+  return readCoachQuota(supabase, "coach_record_successful_message");
+}
+
+async function readCoachQuota(
+  supabase: ReturnType<typeof createClient>,
+  fn: "coach_monthly_status" | "coach_record_successful_message",
 ): Promise<{
   allowed: boolean;
   remaining: number;
@@ -268,7 +292,8 @@ async function persistentCheckAndIncrement(
           allowed: boolean;
           remaining: number;
           used: number;
-          daily_limit: number;
+          daily_limit?: number;
+          monthly_limit?: number;
           plan: "free" | "plus" | "pro";
         }
       | null;
@@ -281,7 +306,7 @@ async function persistentCheckAndIncrement(
   };
   // Cast only the *return type* — the call itself stays bound to supabase.
   const { data, error } = await (
-    supabase.rpc("coach_increment_usage") as unknown as Promise<RpcResponse>
+    supabase.rpc(fn) as unknown as Promise<RpcResponse>
   );
   if (error) {
     // Log only safe diagnostic fields:
@@ -299,7 +324,7 @@ async function persistentCheckAndIncrement(
         hint: error.hint,
         supabaseProjectRef: supabaseProjectRef(),
       },
-      "coach_increment_usage RPC error",
+      `${fn} RPC error`,
     );
     throw error;
   }
@@ -317,7 +342,7 @@ async function persistentCheckAndIncrement(
       allowed: Boolean(data.allowed),
       remaining: Math.max(0, Number(data.remaining) || 0),
       used: Math.max(0, Number(data.used) || 0),
-      dailyLimit: Math.max(1, Number(data.daily_limit) || DEFAULT_DAILY_MESSAGES),
+      dailyLimit: Math.max(1, Number(data.monthly_limit ?? data.daily_limit) || DEFAULT_DAILY_MESSAGES),
       plan: data.plan,
     };
   }
@@ -466,15 +491,16 @@ router.post("/ai/coach", async (req, res) => {
     return;
   }
 
-  // 6. Persistent rate limit — atomic via Supabase RPC after JWT verification
+  // 6. Monthly cap — read only. A failed provider call must not consume a message.
   let quota: Awaited<ReturnType<typeof persistentCheckAndIncrement>>;
   try {
     quota = await persistentCheckAndIncrement(userSupabase);
     if (!quota.allowed) {
       res.status(429).json({
-        error: "Daily message limit reached. Try again tomorrow.",
+        error: "Monthly message limit reached. Your other tools are still available.",
         remaining: 0,
         dailyLimit: quota.dailyLimit,
+        monthlyLimit: quota.dailyLimit,
         plan: quota.plan,
       });
       return;
@@ -505,6 +531,24 @@ router.post("/ai/coach", async (req, res) => {
     return;
   }
 
+  try {
+    quota = await recordSuccessfulCoachMessage(userSupabase);
+  } catch {
+    req.log.warn("Could not record a successful coach message");
+    res.status(503).json({ error: "Coach temporarily unavailable. Please try again later." });
+    return;
+  }
+  if (!quota.allowed) {
+    res.status(429).json({
+      error: "Monthly message limit reached. Your other tools are still available.",
+      remaining: 0,
+      dailyLimit: quota.dailyLimit,
+      monthlyLimit: quota.dailyLimit,
+      plan: quota.plan,
+    });
+    return;
+  }
+
   // The token is self-contained and signed. It proves the response originated
   // here without retaining a conversation server-side, and is never logged or
   // persisted as part of a report.
@@ -518,6 +562,7 @@ router.post("/ai/coach", async (req, res) => {
     remaining: quota.remaining,
     used: quota.used,
     dailyLimit: quota.dailyLimit,
+    monthlyLimit: quota.dailyLimit,
     plan: quota.plan,
     reportToken,
   });

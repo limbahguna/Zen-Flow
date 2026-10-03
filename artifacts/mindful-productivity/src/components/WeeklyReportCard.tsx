@@ -4,6 +4,11 @@ import { getWeeklyReport, WeeklyReportData } from "@/lib/weeklyReport";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/context/LanguageContext";
 
+/** Journal mood is higher-is-better, so the shift needs an explicit sign. */
+function signed(value: number): string {
+  return value >= 0 ? `+${value.toFixed(1)}` : value.toFixed(1);
+}
+
 function getWeekNumber(): number {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 1);
@@ -173,7 +178,7 @@ export default function WeeklyReportCard() {
               paddingRight: 32,
             }}
           >
-            {report.topInsight}
+            {t(report.topInsight.key, report.topInsight.values)}
           </h3>
 
           {!expanded ? (
@@ -223,7 +228,7 @@ export default function WeeklyReportCard() {
                 <StatBox
                   label={t("weekly.stat.intentions")}
                   value={`${report.intentionsCompleted}/${report.intentionsCreated}`}
-                  sub={t("weekly.stat.completionRate").replace("{rate}", String(report.completionRate))}
+                  sub={t("weekly.stat.completionRate", { rate: report.completionRate })}
                   positive={report.completionRate >= 40}
                 />
 
@@ -232,7 +237,7 @@ export default function WeeklyReportCard() {
                   value={`${report.journalEntries}`}
                   sub={
                     report.avgMoodImprovement !== null
-                      ? t("weekly.stat.moodShift").replace("{shift}", report.avgMoodImprovement.toFixed(1))
+                      ? t("weekly.stat.moodShift", { shift: signed(report.avgMoodImprovement) })
                       : undefined
                   }
                   positive={true}
@@ -258,7 +263,7 @@ export default function WeeklyReportCard() {
                 <span style={{ fontSize: 18 }}>🔥</span>
                 <p style={{ fontSize: 13, color: "#C8D5B9" }}>
                   <b style={{ color: "#E8EDE3" }}>
-                    {t("weekly.streak").replace("{n}", String(report.currentStreak))}
+                    {t("weekly.streak", { n: report.currentStreak })}
                   </b>{" "}
                   {report.currentStreak >= 7
                     ? t("weekly.streakReal")

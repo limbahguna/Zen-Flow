@@ -5,6 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import IntentionsPage from "./intentions";
 import JournalPage from "./journal";
 import LearnPage from "./learn";
+import { OPEN_INTENTIONS_EVENT } from "@/lib/intentionSeed";
 
 type Tab = "intentions" | "journal" | "lessons";
 
@@ -29,6 +30,14 @@ export default function PracticePage() {
       setActiveTab(saved);
       localStorage.removeItem("practice_tab");
     }
+  }, []);
+
+  useEffect(() => {
+    function openIntentions() {
+      setActiveTab("intentions");
+    }
+    window.addEventListener(OPEN_INTENTIONS_EVENT, openIntentions);
+    return () => window.removeEventListener(OPEN_INTENTIONS_EVENT, openIntentions);
   }, []);
 
   return (

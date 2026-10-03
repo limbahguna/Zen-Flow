@@ -61,6 +61,9 @@ export interface SubscriptionStatus {
   dailyLimit: number;
   usedToday: number;
   remainingToday: number;
+  monthlyLimit?: number;
+  usedThisMonth?: number;
+  remainingThisMonth?: number;
   selectedRegion: PricingRegion;
   plans: SubscriptionPlan[];
   billingAvailable: boolean;

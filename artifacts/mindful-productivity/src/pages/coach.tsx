@@ -13,7 +13,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import type { LanguageCode } from "@/lib/translations";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useLocation } from "wouter";
 import { trackEvent } from "@/lib/analytics";
 import { appApiUrl } from "@/lib/apiRuntime";
 
@@ -91,7 +90,6 @@ export default function CoachPage() {
   const { data: checks }  = useAnxietyChecks();
   const { data: entries } = useJournal();
   const { language, t }   = useLanguage();
-  const [, setLocation] = useLocation();
   const { data: subscription } = useSubscription();
 
   const uid = user?.id ?? "";
@@ -135,7 +133,9 @@ export default function CoachPage() {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, typing]);
 
   useEffect(() => {
-    if (subscription) setRemaining(subscription.remainingToday);
+    if (subscription) {
+      setRemaining(subscription.remainingThisMonth ?? subscription.remainingToday);
+    }
   }, [subscription]);
 
   // Reset the in-session duplicate guard when the authenticated user changes.
@@ -337,8 +337,11 @@ export default function CoachPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7A8A72]">
-              {remaining ?? "…"} {t("coach.remaining")}
+            <span className="text-xs text-[#7A8A72]" data-testid="coach-remaining">
+              {t("coach.remaining.month", {
+                remaining: remaining == null ? "…" : remaining,
+                limit: subscription?.monthlyLimit ?? 10,
+              })}
             </span>
             <div className="relative">
               <button
@@ -480,21 +483,17 @@ export default function CoachPage() {
           </div>
         )}
 
+        {quotaReached && (
+          <div className="mx-auto mb-4 max-w-sm rounded-xl border border-[#4D3020] bg-[#2D2420] px-4 py-3 text-sm text-[#D4806A]" data-testid="coach-monthly-limit">
+            {t("coach.error.limit")}
+          </div>
+        )}
+
         {error && (
           <div className="mx-auto mb-4 max-w-sm rounded-xl border border-[#4D3020] bg-[#2D2420] px-4 py-3 text-sm text-[#D4806A]" data-testid="coach-error">
             <div className="flex items-center gap-2">
               <RotateCcw className="h-4 w-4 shrink-0" />{error}
             </div>
-            {quotaReached && (
-              <button
-                type="button"
-                onClick={() => setLocation("/plans")}
-                className="mt-3 rounded-lg bg-[#4A5D3E] px-3 py-2 text-xs font-semibold text-[#E8EDE3] hover:bg-[#5A7050]"
-                data-testid="coach-upgrade-link"
-              >
-                {t("coach.upgrade")}
-              </button>
-            )}
           </div>
         )}
         <div ref={bottomRef} />
