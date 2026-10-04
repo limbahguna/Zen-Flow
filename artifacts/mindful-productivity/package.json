@@ -10,6 +10,10 @@
     "cap:sync:android": "pnpm exec cap sync android",
     "android:prepare": "pnpm run build:android:web && pnpm run cap:sync:android",
     "android:open": "pnpm exec cap open android",
+    "build:ios:web": "vite build --config vite.config.ts",
+    "cap:sync:ios": "pnpm exec cap sync ios",
+    "ios:prepare": "pnpm run build:ios:web && pnpm run cap:sync:ios",
+    "ios:open": "pnpm exec cap open ios",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --reporter=verbose"
@@ -20,6 +24,7 @@
     "@capacitor/browser": "^7.0.5",
     "@capacitor/cli": "^7.6.8",
     "@capacitor/core": "^7.6.8",
+    "@capacitor/ios": "^7.6.8",
     "@capacitor/local-notifications": "7.0.7",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.4",

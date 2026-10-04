@@ -10,6 +10,10 @@ const config: CapacitorConfig = {
     // system-bar insets as WebView margins for both 3-button and gesture nav.
     adjustMarginsForEdgeToEdge: "force",
   },
+  ios: {
+    // Leave scheme unset so iOS keeps Capacitor's default capacitor:// URL.
+    // androidScheme remains https for the Android edge-to-edge WebView.
+  },
 };
 
 export default config;
