@@ -19,8 +19,7 @@ workflows:
 
       - name: Install project dependencies
         script: |
-          pnpm install --force --no-frozen-lockfile
-          pnpm add --ignore-workspace-root-check --no-save @rollup/rollup-darwin-arm64@4.60.3
+          pnpm install --force --frozen-lockfile
 
       - name: Add iOS platform if needed
         script: |
