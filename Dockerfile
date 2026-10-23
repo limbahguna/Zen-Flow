@@ -21,6 +21,11 @@ ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
 ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+ENV HOSTINGER_WEB_BUILD=1
+
+# Fail the image build if public Supabase values were not passed from compose.
+# Do not print the values.
+RUN test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_ANON_KEY"
 
 ENV CI=true
 ENV PNPM_HOME=/pnpm

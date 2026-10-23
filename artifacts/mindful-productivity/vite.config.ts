@@ -21,24 +21,41 @@ export default defineConfig(async ({ command, mode }) => {
   });
   process.env.VITE_API_BASE_URL = resolvedApiBaseUrl;
 
-  if (isBuild && mode === "android") {
+  if (isBuild) {
     const supabaseProjectUrl = process.env.VITE_SUPABASE_URL || buildEnv.VITE_SUPABASE_URL;
     const supabaseAnonKey =
       process.env.VITE_SUPABASE_ANON_KEY || buildEnv.VITE_SUPABASE_ANON_KEY;
-    if (!supabaseProjectUrl) {
-      throw new Error("Android builds require API and Supabase project URLs.");
+    const requireSupabase =
+      mode === "android" || process.env.HOSTINGER_WEB_BUILD === "1";
+
+    if (requireSupabase && !supabaseProjectUrl) {
+      throw new Error(
+        mode === "android"
+          ? "Android builds require API and Supabase project URLs."
+          : "Hostinger web builds require VITE_SUPABASE_URL.",
+      );
     }
-    const supabaseUrl = new URL(supabaseProjectUrl);
-    if (
-      supabaseUrl.protocol !== "https:" ||
-      !supabaseUrl.hostname.endsWith(".supabase.co") ||
-      supabaseUrl.hostname.includes("localhost") ||
-      supabaseUrl.hostname.includes("replit")
-    ) {
-      throw new Error("Android builds require a valid HTTPS Supabase project URL.");
+    if (supabaseProjectUrl) {
+      const supabaseUrl = new URL(supabaseProjectUrl);
+      if (
+        supabaseUrl.protocol !== "https:" ||
+        !supabaseUrl.hostname.endsWith(".supabase.co") ||
+        supabaseUrl.hostname.includes("localhost") ||
+        supabaseUrl.hostname.includes("replit")
+      ) {
+        throw new Error(
+          mode === "android"
+            ? "Android builds require a valid HTTPS Supabase project URL."
+            : "Web builds require a valid HTTPS Supabase project URL.",
+        );
+      }
     }
-    if (!supabaseAnonKey) {
-      throw new Error("Android builds require the Supabase anonymous key.");
+    if (requireSupabase && !supabaseAnonKey) {
+      throw new Error(
+        mode === "android"
+          ? "Android builds require the Supabase anonymous key."
+          : "Hostinger web builds require VITE_SUPABASE_ANON_KEY.",
+      );
     }
   }
 

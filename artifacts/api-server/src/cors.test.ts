@@ -19,8 +19,14 @@
  * we can test both paths simply by setting NODE_ENV before each request.
  */
 
-import { beforeEach, afterEach, describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import supertest from "supertest";
+
+vi.hoisted(() => {
+  process.env.DATABASE_URL ??=
+    "postgresql://zenflow:test@127.0.0.1:5432/zenflow_test";
+});
+
 import app from "./app";
 
 const request = supertest(app);

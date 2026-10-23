@@ -17,6 +17,8 @@ describe("Android production connectivity configuration", () => {
     expect(viteConfig).toContain("resolveBuildTimeApiBaseUrl");
     expect(viteConfig).toContain("import.meta.env.VITE_API_BASE_URL");
     expect(viteConfig).toContain("supabaseUrl.protocol !== \"https:\"");
+    expect(viteConfig).toContain("HOSTINGER_WEB_BUILD");
+    expect(viteConfig).toContain("Web builds require a valid HTTPS Supabase project URL.");
     expect(
       resolveBuildTimeApiBaseUrl({
         command: "build",

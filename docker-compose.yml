@@ -1,12 +1,18 @@
-# Zen-Flow production stack for a Hostinger VPS.
+# Mindful Space (Zen-Flow) on a Hostinger VPS that already runs Traefik.
 #
-# One service runs the Express API and serves the compiled Vite frontend.
-# Runtime secrets come from ./.env on the VPS (git-ignored, never baked into
-# the image). Public Supabase values are build args because Vite inlines them
-# into the browser bundle at build time.
+# Isolated Compose project: does not attach to Traefik, does not bind host
+# ports 80 or 443, and uses unique container/image names so it cannot collide
+# with hermes-agent-lupk or openclaw-oyz2.
 #
-# The container is published on 127.0.0.1 only; nginx terminates TLS and proxies
-# to it. See deploy/nginx/zen-flow.conf.
+# Staging (before DNS cutover): publish only on loopback and test via SSH
+# tunnel. Do not install the nginx site in deploy/nginx/zen-flow.conf — Traefik
+# already owns 80/443.
+#
+# Optional HTTPS via Traefik later:
+#   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
+# Only after a dedicated hostname exists. That overlay still does not bind 80/443.
+
+name: mindful-space
 
 services:
   app:
@@ -16,8 +22,8 @@ services:
       args:
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
         VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-    image: zen-flow-app:latest
-    container_name: zen-flow-app
+    image: mindful-space-app:latest
+    container_name: mindful-space-app
     restart: unless-stopped
     env_file:
       - .env
@@ -25,7 +31,8 @@ services:
       NODE_ENV: production
       PORT: 3000
     ports:
-      - "127.0.0.1:${HOST_PORT:-3000}:3000"
+      # Loopback only. Never 80/443. Change HOST_PORT if 3010 is taken.
+      - "127.0.0.1:${HOST_PORT:-3010}:3000"
     healthcheck:
       test:
         [
@@ -43,3 +50,10 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+    networks:
+      - mindful-space-internal
+
+networks:
+  mindful-space-internal:
+    name: mindful-space-internal
+    driver: bridge
