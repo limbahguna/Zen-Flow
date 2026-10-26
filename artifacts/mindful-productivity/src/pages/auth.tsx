@@ -12,17 +12,37 @@ import {
   OAUTH_ERROR_EVENT,
   OAUTH_FINISHED_EVENT,
   OAUTH_SUCCESS_EVENT,
+  isNativeApp,
   openGoogleSignIn,
   requestPasswordReset,
 } from "@/lib/native";
 import LanguageSelector from "@/components/LanguageSelector";
 import { trackEvent } from "@/lib/analytics";
+import {
+  getStoredLandingLanguage,
+  isLandingLanguage,
+  storeLandingLanguage,
+} from "@/lib/landingCopy";
+import {
+  WEB_AUTH_ARABIC,
+  webAuthText,
+  type WebAuthLanguage,
+} from "@/lib/webAuthCopy";
+import type { LanguageCode } from "@/lib/translations";
 
 export default function AuthPage() {
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { language, setLanguage, t: translate } = useLanguage();
+  const native = isNativeApp();
+  const [webLang, setWebLang] = useState<WebAuthLanguage>(() => {
+    if (native) return language;
+    const stored = getStoredLandingLanguage(language);
+    return stored === WEB_AUTH_ARABIC ? WEB_AUTH_ARABIC : language;
+  });
+  const t = (key: string) => webAuthText(native ? language : webLang, key, translate);
+  const rtl = !native && webLang === WEB_AUTH_ARABIC;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -141,11 +161,26 @@ export default function AuthPage() {
     }
   };
 
+  function onWebLanguageChange(next: WebAuthLanguage) {
+    setWebLang(next);
+    if (isLandingLanguage(next)) storeLandingLanguage(next);
+    if (next !== WEB_AUTH_ARABIC) setLanguage(next as LanguageCode);
+  }
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background">
+    <div
+      className="min-h-screen w-full flex items-center justify-center p-4 bg-background"
+      dir={rtl ? "rtl" : "ltr"}
+      lang={native ? language : webLang}
+      data-testid="auth-page"
+    >
       <div className="w-full max-w-md space-y-6">
         <div className="flex justify-end">
-          <LanguageSelector />
+          <LanguageSelector
+            includeArabic={!native}
+            value={native ? language : webLang}
+            onLanguageChange={onWebLanguageChange}
+          />
         </div>
 
         {/* Logo + heading */}
@@ -167,7 +202,8 @@ export default function AuthPage() {
                 onClick={handleGoogleLogin}
                 disabled={googleLoading}
                 data-testid="button-google-login"
-                className="w-full h-12 rounded-xl flex items-center justify-center gap-3 transition-opacity duration-200 disabled:opacity-60"
+                dir="ltr"
+                className="w-full h-12 rounded-xl flex flex-row items-center justify-center gap-3 transition-opacity duration-200 disabled:opacity-60"
                 style={{
                   backgroundColor: "#E8EDE3",
                   color: "#1A1E1A",
@@ -196,18 +232,20 @@ export default function AuthPage() {
               </div>
 
               {/* Sign In / Sign Up tabs */}
-              <TabsList className="grid w-full grid-cols-2 h-11 bg-[#1E241E] rounded-xl p-1">
+              <TabsList
+                className={`flex h-11 w-full rounded-xl bg-[#1E241E] p-1 ${rtl ? "flex-row-reverse" : ""}`}
+              >
                 <TabsTrigger
                   value="signin"
                   data-testid="tab-signin"
-                  className="rounded-lg data-[state=active]:bg-[#2D3A2E] data-[state=active]:text-[#E8EDE3] text-[#7A8A72]"
+                  className="flex-1 rounded-lg data-[state=active]:bg-[#2D3A2E] data-[state=active]:text-[#E8EDE3] text-[#7A8A72]"
                 >
                   {t("auth.tab.signin")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
                   data-testid="tab-signup"
-                  className="rounded-lg data-[state=active]:bg-[#2D3A2E] data-[state=active]:text-[#E8EDE3] text-[#7A8A72]"
+                  className="flex-1 rounded-lg data-[state=active]:bg-[#2D3A2E] data-[state=active]:text-[#E8EDE3] text-[#7A8A72]"
                 >
                   {t("auth.tab.signup")}
                 </TabsTrigger>
@@ -248,7 +286,7 @@ export default function AuthPage() {
                       onClick={handleForgotPassword}
                       disabled={resetLoading}
                       data-testid="button-forgot-password"
-                      className="block ml-auto text-xs text-[#8FA680] hover:underline disabled:opacity-60"
+                      className="ms-auto block text-xs text-[#8FA680] hover:underline disabled:opacity-60"
                     >
                       {resetLoading
                         ? t("auth.reset.request.loading")

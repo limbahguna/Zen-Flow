@@ -44,9 +44,10 @@ const copy = {
     "hero.title": "A quieter way through busy days",
     "hero.lead":
       "For people who feel crowded by tasks, worry, or restlessness. Check in with how you feel, set a small intention, write a little, and practice in short steps — in your browser.",
-    "hero.cta": "Create an account",
+    "hero.cta": "Get started",
     "hero.secondary": "Log in",
-    "hero.visualLabel": "Abstract illustration of a leaf in still water",
+    "hero.visualLabel": "Sunlit path through a quiet forest",
+    "who.photoAlt": "Sunrise over a quiet grassy hillside with a few trees",
     "who.title": "Made for ordinary, overloaded days",
     "who.body":
       "Mindful Space is a personal practice space. It is not therapy, diagnosis, or a substitute for professional care. If you are in crisis, please reach someone who can help.",
@@ -77,7 +78,7 @@ const copy = {
     "close.title": "Begin when you are ready",
     "close.body":
       "No rush. When you want a calmer place to practice, the door is the login page.",
-    "close.cta": "Go to login",
+    "close.cta": "Get started",
     "disclaimer":
       "Mindful Space does not diagnose, treat, or replace professional mental-health care. If you need urgent help, use the crisis resources linked below.",
     "footer.nav": "Legal and account",
@@ -101,9 +102,10 @@ const copy = {
     "hero.title": "Cara yang lebih tenang melewati hari yang penuh",
     "hero.lead":
       "Untuk orang yang merasa sesak oleh tugas, khawatir, atau gelisah. Cek perasaanmu, tulis niat kecil, mencatat sebentar, dan berlatih dalam langkah singkat — di peramban.",
-    "hero.cta": "Buat akun",
+    "hero.cta": "Mulai",
     "hero.secondary": "Masuk",
-    "hero.visualLabel": "Ilustrasi abstrak daun di air yang tenang",
+    "hero.visualLabel": "Jalur yang disinari matahari di hutan yang tenang",
+    "who.photoAlt": "Matahari terbit di lereng berumput yang tenang dengan beberapa pohon",
     "who.title": "Untuk hari biasa yang terasa terlalu banyak",
     "who.body":
       "Mindful Space adalah ruang latihan pribadi. Ini bukan terapi, diagnosis, atau pengganti bantuan profesional. Jika kamu dalam krisis, mintalah bantuan orang yang bisa menolong.",
@@ -134,7 +136,7 @@ const copy = {
     "close.title": "Mulai ketika kamu siap",
     "close.body":
       "Tidak perlu terburu-buru. Jika kamu ingin ruang yang lebih tenang untuk berlatih, pintunya adalah halaman masuk.",
-    "close.cta": "Ke halaman masuk",
+    "close.cta": "Mulai",
     "disclaimer":
       "Mindful Space tidak mendiagnosis, mengobati, atau menggantikan perawatan kesehatan mental profesional. Jika kamu butuh bantuan segera, gunakan sumber krisis di tautan bawah.",
     "footer.nav": "Hukum dan akun",
@@ -158,9 +160,10 @@ const copy = {
     "hero.title": "طريقة أهدأ لأيام مزدحمة",
     "hero.lead":
       "للأشخاص الذين يثقلهم العمل أو القلق أو التململ. راقب شعورك، ضع نية صغيرة، اكتب قليلًا، وتدرّب بخطوات قصيرة — في المتصفح.",
-    "hero.cta": "إنشاء حساب",
+    "hero.cta": "ابدأ",
     "hero.secondary": "تسجيل الدخول",
-    "hero.visualLabel": "رسم تجريدي لورقة على ماء ساكن",
+    "hero.visualLabel": "مسار مشمس في غابة هادئة",
+    "who.photoAlt": "شروق الشمس فوق تلة عشبية هادئة فيها بعض الأشجار",
     "who.title": "لأيام عادية تشعر بأنها فوق الطاقة",
     "who.body":
       "Mindful Space مساحة تمرين شخصية. ليست علاجًا ولا تشخيصًا ولا بديلًا عن الرعاية المهنية. إن كنت في أزمة، فاطلب مساعدة ممن يستطيع العون.",
@@ -191,7 +194,7 @@ const copy = {
     "close.title": "ابدأ عندما تكون مستعدًا",
     "close.body":
       "لا عجلة. إذا أردت مكانًا أهدأ للتدرّب، فالباب هو صفحة تسجيل الدخول.",
-    "close.cta": "إلى تسجيل الدخول",
+    "close.cta": "ابدأ",
     "disclaimer":
       "Mindful Space لا يشخص ولا يعالج ولا يحل محل الرعاية النفسية المهنية. إن احتجت مساعدة عاجلة، استخدم موارد الأزمة في الروابط أدناه.",
     "footer.nav": "قانوني والحساب",
@@ -215,9 +218,10 @@ const copy = {
     "hero.title": "忙しい日を、もう少し静かに",
     "hero.lead":
       "やることに追われたり、不安や落ち着かなさを感じる人のための場所です。気分を確かめ、小さな意図を置き、少し書いて、短い実践をする。ブラウザで使えます。",
-    "hero.cta": "アカウントを作る",
+    "hero.cta": "始める",
     "hero.secondary": "ログイン",
-    "hero.visualLabel": "静かな水面に葉を描いた抽象イラスト",
+    "hero.visualLabel": "静かな森の中の陽だまりの道",
+    "who.photoAlt": "木の立つ静かな丘に差し込む朝日",
     "who.title": "普通の、でも荷が重い日のために",
     "who.body":
       "Mindful Spaceは個人の実践の場です。治療でも診断でも、専門的なケアの代わりでもありません。危機にあるときは、助けてくれる人に連絡してください。",
@@ -248,7 +252,7 @@ const copy = {
     "close.title": "準備ができたら、始めてください",
     "close.body":
       "急がなくて大丈夫です。静かに実践したいとき、入口はログインページです。",
-    "close.cta": "ログインへ",
+    "close.cta": "始める",
     "disclaimer":
       "Mindful Spaceは診断・治療を行わず、専門的なメンタルヘルスケアの代わりにもなりません。緊急の助けが必要なときは、下の危機リソースを使ってください。",
     "footer.nav": "法務とアカウント",

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   signIn: vi.fn(async () => ({ error: null })),
   signUp: vi.fn(async () => ({ error: null })),
   user: null as null | { id: string },
+  native: false,
 }));
 
 vi.mock("wouter", () => ({
@@ -33,7 +34,7 @@ vi.mock("@/lib/native", () => ({
   OAUTH_ERROR_EVENT: "mindful-oauth-error",
   OAUTH_FINISHED_EVENT: "mindful-oauth-finished",
   OAUTH_SUCCESS_EVENT: "mindful-oauth-success",
-  isNativeApp: () => false,
+  isNativeApp: () => mocks.native,
   openGoogleSignIn: vi.fn(async () => ({ error: null })),
   requestPasswordReset: vi.fn(async () => ({ error: null })),
 }));
@@ -54,6 +55,7 @@ describe("public auth language selector", () => {
     mocks.signIn.mockClear();
     mocks.signUp.mockClear();
     mocks.user = null;
+    mocks.native = false;
   });
 
   afterEach(() => {
@@ -61,7 +63,7 @@ describe("public auth language selector", () => {
     localStorage.clear();
   });
 
-  it("shows all three language labels on the public auth surface", () => {
+  it("shows Arabic on the public web auth surface", () => {
     renderAuth();
 
     const selector = screen.getByTestId("language-selector");
@@ -69,7 +71,33 @@ describe("public auth language selector", () => {
     expect(screen.getByRole("option", { name: "English" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "Bahasa Indonesia" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "日本語" })).not.toBeNull();
+    expect(screen.getByRole("option", { name: "العربية" })).not.toBeNull();
     expect(screen.getByLabelText("Select language")).toBe(selector);
+  });
+
+  it("hides Arabic on native auth", () => {
+    mocks.native = true;
+    renderAuth();
+
+    expect(screen.getByRole("option", { name: "English" })).not.toBeNull();
+    expect(screen.queryByRole("option", { name: "العربية" })).toBeNull();
+    expect(screen.getByTestId("auth-page").getAttribute("dir")).toBe("ltr");
+  });
+
+  it("translates web login copy to Arabic and uses RTL", async () => {
+    const user = userEvent.setup();
+    renderAuth();
+
+    await user.selectOptions(screen.getByTestId("language-selector"), "ar");
+
+    const page = screen.getByTestId("auth-page");
+    expect(page.getAttribute("dir")).toBe("rtl");
+    expect(page.getAttribute("lang")).toBe("ar");
+    expect(screen.getByTestId("button-google-login").textContent).toContain("المتابعة بالحساب");
+    expect((screen.getByTestId("button-google-login").textContent.match(/Google/g) ?? []).length).toBe(0);
+    expect(screen.getByTestId("tab-signin").textContent).toBe("تسجيل الدخول");
+    expect(screen.getByTestId("button-submit-signin").textContent).toBe("تسجيل الدخول");
+    expect(localStorage.getItem("mindful_language")).not.toBe("ar");
   });
 
   it("persists Indonesian and translates the sign-in and sign-up states", async () => {

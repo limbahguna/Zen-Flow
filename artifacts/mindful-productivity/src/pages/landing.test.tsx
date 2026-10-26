@@ -38,10 +38,14 @@ describe("public landing page", () => {
       "landing-hero-cta",
       "landing-hero-login",
       "landing-close-cta",
+      "landing-close-login",
       "landing-footer-login",
     ].map((id) => (screen.getByTestId(id) as HTMLAnchorElement).getAttribute("href"));
 
     expect(authHrefs.every((href) => href === "/auth")).toBe(true);
+    const whoPhoto = document.querySelector('img[src="/landing/practice-light.jpg"]');
+    expect(whoPhoto?.getAttribute("alt")).toBe(landingText("en", "who.photoAlt"));
+    expect(landingText("en", "who.photoAlt").toLowerCase()).toContain("hillside");
   });
 
   it("switches all four languages without leftover English on Arabic", async () => {
