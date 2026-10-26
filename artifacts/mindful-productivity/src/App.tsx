@@ -26,6 +26,7 @@ import ProgramDetailPage from "@/pages/program-detail";
 import DailyPlanPage from "@/pages/daily-plan";
 import ProgressPage from "@/pages/progress";
 import ResetPasswordPage from "@/pages/reset-password";
+import HomeRoute from "@/pages/home";
 import { SetupRoute } from "@/components/ProtectedRoute";
 import { LanguageProfileSync } from "@/components/LanguageProfileSync";
 import { LocalNotifications } from "@capacitor/local-notifications";
@@ -92,30 +93,10 @@ function MovementNotificationSync() {
   return null;
 }
 
-function RootRoute() {
-  const { user, loading } = useAuth();
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (loading) return;
-    if (user) {
-      setLocation("/dashboard");
-    } else {
-      setLocation("/auth");
-    }
-  }, [user, loading, setLocation]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-    </div>
-  );
-}
-
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={RootRoute} />
+      <Route path="/" component={HomeRoute} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/setup">
