@@ -1,3 +1,7 @@
+# Unused on the current Hostinger VPS (no Traefik process or network).
+# Public HTTPS uses docker-compose.caddy.yml instead. Do not start this overlay
+# while Caddy owns 80/443.
+#
 # Optional Traefik attachment. Not used for the pre-DNS staging test.
 #
 # Usage (only after a hostname is ready — still do not change getmindfulspace.com DNS):
@@ -11,7 +15,7 @@
 #   TRAEFIK_ENTRYPOINT — usually websecure
 #   TRAEFIK_CERTRESOLVER — your existing Let's Encrypt resolver name, if any
 #
-# This file never publishes 80 or 443. Traefik keeps those ports.
+# This file never publishes 80 or 443. Do not start it while Caddy binds those ports.
 
 services:
   app:

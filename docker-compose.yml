@@ -1,16 +1,13 @@
-# Mindful Space (Zen-Flow) on a Hostinger VPS that already runs Traefik.
+# Mindful Space (Zen-Flow) on the Hostinger VPS.
 #
-# Isolated Compose project: does not attach to Traefik, does not bind host
-# ports 80 or 443, and uses unique container/image names so it cannot collide
-# with hermes-agent-lupk or openclaw-oyz2.
+# Isolated Compose project: unique container/image names so it cannot collide
+# with Hermes, OpenClaw, or n8n. This file never publishes host ports 80 or 443.
+# Loopback 127.0.0.1:3010 stays available for SSH-tunnel staging.
 #
-# Staging (before DNS cutover): publish only on loopback and test via SSH
-# tunnel. Do not install the nginx site in deploy/nginx/zen-flow.conf — Traefik
-# already owns 80/443.
-#
-# Optional HTTPS via Traefik later:
-#   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
-# Only after a dedicated hostname exists. That overlay still does not bind 80/443.
+# Public HTTPS is the Caddy overlay (only that file binds 80/443):
+#   docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d
+# Do not install deploy/nginx/zen-flow.conf. Do not use docker-compose.traefik.yml
+# on this host (no Traefik is running; 80/443 are reserved for Caddy).
 
 name: mindful-space
 

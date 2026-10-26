@@ -1,0 +1,22 @@
+# Mindful Space public reverse proxy.
+#
+# Automatic HTTPS (Let's Encrypt) for:
+#   getmindfulspace.com
+#   www.getmindfulspace.com
+#
+# Upstream is the Compose service/container on the mindful-space-internal
+# network. Do not point this file at Hermes, OpenClaw, or n8n.
+#
+# Certificates succeed only after public DNS A/AAAA records for both names
+# point at this VPS and host firewall/security group allows 80 and 443.
+# Start this overlay and validate compose before any DNS cutover; ACME
+# retries after records move.
+
+{
+	email {$CADDY_ACME_EMAIL}
+}
+
+getmindfulspace.com, www.getmindfulspace.com {
+	encode gzip
+	reverse_proxy mindful-space-app:3000
+}

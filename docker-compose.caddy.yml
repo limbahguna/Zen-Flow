@@ -1,0 +1,44 @@
+# Public HTTPS reverse proxy for Mindful Space only.
+#
+# This overlay is the only Compose file in this repo that publishes host
+# ports 80 and 443. The app container stays on 127.0.0.1:3010→3000.
+#
+# Do not attach this service to Hermes, OpenClaw, n8n, or Traefik networks.
+# Do not change those stacks. On this VPS those ports were empty; this
+# overlay uses them for Mindful Space ACME + HTTPS only.
+#
+# Start after validating config, before DNS cutover:
+#   docker compose --project-name mindful-space \
+#     -f docker-compose.yml -f docker-compose.caddy.yml config
+#   docker compose --project-name mindful-space \
+#     -f docker-compose.yml -f docker-compose.caddy.yml up -d
+#
+# ACME certificates are issued after getmindfulspace.com and
+# www.getmindfulspace.com resolve to this host.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: mindful-space-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      CADDY_ACME_EMAIL: ${CADDY_ACME_EMAIL:?set CADDY_ACME_EMAIL in .env}
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - mindful-space-caddy-data:/data
+      - mindful-space-caddy-config:/config
+    networks:
+      - mindful-space-internal
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  mindful-space-caddy-data:
+    name: mindful-space-caddy-data
+  mindful-space-caddy-config:
+    name: mindful-space-caddy-config
