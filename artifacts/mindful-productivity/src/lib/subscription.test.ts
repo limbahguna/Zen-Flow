@@ -60,6 +60,6 @@ describe("subscription API URL", () => {
         isDev: false,
         isNative: true,
       }),
-    ).toBe("https://getmindfulspace.com/api/subscription?region=indonesia");
+    ).toBe("https://kindease.app/api/subscription?region=indonesia");
   });
 });

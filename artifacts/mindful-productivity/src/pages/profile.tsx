@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { LogOut, ListChecks, CheckCircle2, NotebookPen, HeartPulse, Timer, Shield, FileText, Phone, Moon, Trash2, Sparkles, ChevronRight } from "lucide-react";
@@ -14,7 +14,8 @@ import { useAnxietyChecks } from "@/hooks/useAnxietyChecks";
 import { currentStreak } from "@/lib/insights";
 import { useLanguage } from "@/context/LanguageContext";
 import { LANGUAGE_OPTIONS } from "@/lib/translations";
-import { useState } from "react";
+import { FocusGoalPicker } from "@/components/FocusGoalPicker";
+import { loadFocusGoals, saveFocusGoals, type FocusGoalId } from "@/lib/focusGoals";
 
 function formatDate(iso: string | undefined, lang: string): string {
   if (!iso) return "—";
@@ -68,6 +69,22 @@ export default function ProfilePage() {
   const [bedtime, setBedtime] = useState(() => {
     try { return localStorage.getItem("mindful_bedtime") ?? ""; } catch { return ""; }
   });
+  const [focusGoals, setFocusGoals] = useState<FocusGoalId[]>(() =>
+    user?.id ? loadFocusGoals(user.id) : [],
+  );
+
+  useEffect(() => {
+    setFocusGoals(user?.id ? loadFocusGoals(user.id) : []);
+  }, [user?.id]);
+
+  function toggleFocusGoal(id: FocusGoalId) {
+    if (!user?.id) return;
+    setFocusGoals((prev) => {
+      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      saveFocusGoals(user.id, next);
+      return next;
+    });
+  }
   const [movementSessionOpen, setMovementSessionOpen] = useState(false);
 
   const windDownCount = useMemo(() => {
@@ -208,6 +225,23 @@ export default function ProfilePage() {
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 text-[#7A8A72]" />
         </button>
+
+        {/* ── Practice focus ──────────────────────────────────────────── */}
+        <section
+          className="rounded-2xl border border-[#2D3A2E] bg-[#222822] p-4"
+          data-testid="profile-focus-goals"
+        >
+          <p className="text-sm font-medium text-[#E8EDE3]">{t("profile.focusGoals.title")}</p>
+          <p className="mt-1 text-xs leading-relaxed text-[#7A8A72]">
+            {t("profile.focusGoals.subtitle")}
+          </p>
+          <div className="mt-4">
+            <FocusGoalPicker selected={focusGoals} onToggle={toggleFocusGoal} compact />
+          </div>
+          <p className="mt-3 text-xs text-[#7A8A72]">
+            {focusGoals.length === 0 ? t("profile.focusGoals.empty") : t("profile.focusGoals.saved")}
+          </p>
+        </section>
 
         {/* ── Language ────────────────────────────────────────────────── */}
         <div style={{

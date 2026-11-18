@@ -38,7 +38,7 @@ describe("t() — translation lookup", () => {
   it("falls back to English when key is missing in target language", () => {
     // profile.version is in en; if missing in id, falls back to en value
     const result = t("id", "profile.version");
-    expect(result).toBe("Mindful Space v1.0");
+    expect(result).toBe("KindEase v1.0");
   });
 
   it("returns the key itself when not found in any language", () => {
@@ -57,6 +57,14 @@ describe("t() — translation lookup", () => {
     expect(t("id", "practice.tab.lessons")).toBe("Pelajaran");
   });
 
+  it("localizes the first-run focus goal prompt", () => {
+    expect(t("id", "onboarding.goals.title")).toBe("Apa yang ingin kamu fokuskan?");
+    expect(t("id", "onboarding.continue")).toBe("Lanjutkan");
+    expect(t("id", "onboarding.skipForNow")).toBe("Lewati dulu");
+    expect(t("ja", "onboarding.goals.title")).toBe("何に取り組みたいですか？");
+    expect(t("en", "onboarding.goals.subtitle")).toContain("not diagnosis or therapy");
+  });
+
   it("uses Daily Insight terminology for the dashboard lesson label", () => {
     expect(t("en", "dashboard.quickActions.lessons")).toBe("Daily Insight");
     expect(t("id", "dashboard.quickActions.lessons")).toBe("Wawasan Harian");
@@ -65,7 +73,7 @@ describe("t() — translation lookup", () => {
 
   it("returns Indonesian coach strings", () => {
     expect(t("id", "coach.placeholder")).toBe("Ceritakan apa yang ada di pikiranmu…");
-    expect(t("id", "coach.emptyTitle")).toBe("Teman mindful-mu");
+    expect(t("id", "coach.emptyTitle")).toBe("Teman baikmu untuk ketenangan");
     expect(t("id", "coach.error.limit")).toContain("10 pesan AI Coach");
   });
 

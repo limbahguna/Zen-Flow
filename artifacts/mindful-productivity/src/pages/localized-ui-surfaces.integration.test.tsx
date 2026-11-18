@@ -502,7 +502,7 @@ describe("AuthPage — real page localization", () => {
 
   it("renders English tagline and tab labels by default", async () => {
     await renderAuthInLang("en");
-    expect(screen.getByText("Your mindful companion.")).toBeTruthy();
+    expect(screen.getByText("Your kind companion for calm.")).toBeTruthy();
     expect(screen.getByText("Continue with Google")).toBeTruthy();
     expect(screen.getByTestId("tab-signin").textContent).toBe("Sign In");
     expect(screen.getByTestId("tab-signup").textContent).toBe("Sign Up");
@@ -510,7 +510,7 @@ describe("AuthPage — real page localization", () => {
 
   it("renders Indonesian copy when language is id", async () => {
     await renderAuthInLang("id");
-    expect(screen.getByText("Teman mindful-mu.")).toBeTruthy();
+    expect(screen.getByText("Teman baikmu untuk ketenangan.")).toBeTruthy();
     expect(screen.getByText("Lanjutkan dengan Google")).toBeTruthy();
     expect(screen.getByTestId("tab-signin").textContent).toBe("Masuk");
     expect(screen.getByTestId("tab-signup").textContent).toBe("Daftar");
@@ -518,7 +518,7 @@ describe("AuthPage — real page localization", () => {
 
   it("renders Japanese copy when language is ja", async () => {
     await renderAuthInLang("ja");
-    expect(screen.getByText("あなたのマインドフルな伴走者。")).toBeTruthy();
+    expect(screen.getByText("穏やかさのための優しい伴走者。")).toBeTruthy();
     expect(screen.getByText("Googleで続ける")).toBeTruthy();
     expect(screen.getByTestId("tab-signin").textContent).toBe("サインイン");
     expect(screen.getByTestId("tab-signup").textContent).toBe("新規登録");
@@ -529,16 +529,16 @@ describe("AuthPage — real page localization", () => {
     await renderAuthInLang("en");
 
     // EN baseline
-    expect(screen.getByText("Your mindful companion.")).toBeTruthy();
+    expect(screen.getByText("Your kind companion for calm.")).toBeTruthy();
 
     // Switch to Indonesian
     await user.click(screen.getByTestId("switch-to-id"));
-    expect(screen.getByText("Teman mindful-mu.")).toBeTruthy();
+    expect(screen.getByText("Teman baikmu untuk ketenangan.")).toBeTruthy();
     expect(screen.getByTestId("tab-signin").textContent).toBe("Masuk");
 
     // Switch to Japanese
     await user.click(screen.getByTestId("switch-to-ja"));
-    expect(screen.getByText("あなたのマインドフルな伴走者。")).toBeTruthy();
+    expect(screen.getByText("穏やかさのための優しい伴走者。")).toBeTruthy();
     expect(screen.getByTestId("tab-signin").textContent).toBe("サインイン");
   });
 

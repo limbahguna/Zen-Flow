@@ -142,7 +142,7 @@ describe("/delete-account — public page (unauthenticated)", () => {
   it("shows developer info with app name for Google Play compliance", () => {
     renderPage();
     const info = screen.getByTestId("delete-developer-info");
-    expect(info.textContent).toContain("Mindful Space");
+    expect(info.textContent).toContain("KindEase");
   });
 
   it("guest CTA navigates to /auth when clicked", async () => {

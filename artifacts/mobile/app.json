@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Mindful Productivity Mobile",
+    "name": "KindEase",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,22 +9,28 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2F4236"
     },
     "ios": {
       "supportsTablet": false
     },
-    "android": {},
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#2F4236",
+        "monochromeImage": "./assets/images/adaptive-icon-monochrome.png"
+      }
+    },
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       [
         "expo-router",
         {
-          "origin": "https://getmindfulspace.com"
+          "origin": "https://kindease.app"
         }
       ],
       "expo-font",

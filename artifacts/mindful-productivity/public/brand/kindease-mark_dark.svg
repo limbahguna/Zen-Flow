@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><g transform="translate(512 512) scale(1.0) translate(-512 -512)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs><linearGradient id="w" x1="150" y1="0" x2="874" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#2F4236"/><stop offset="0.5" stop-color="#2F4236"/><stop offset="0.62" stop-color="#2F4236"/><stop offset="1" stop-color="#2F4236"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="312" stroke="#2F4236" stroke-width="26"/>
+  <path d="M150 556 C205 556 228 498 290 498 C365 498 392 604 452 604 C522 604 578 424 664 424 C742 424 784 548 874 548" stroke="url(#w)" stroke-width="30"/>
+</g></svg>

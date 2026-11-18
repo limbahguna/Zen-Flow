@@ -1,22 +1,33 @@
-# Mindful Space public reverse proxy.
+# KindEase public reverse proxy.
 #
 # Automatic HTTPS (Let's Encrypt) for:
-#   getmindfulspace.com
+#   kindease.app          — primary site
+#   www.kindease.app      — redirects to apex
+#   getmindfulspace.com   — permanent redirect to kindease.app
 #   www.getmindfulspace.com
 #
 # Upstream is the Compose service/container on the mindful-space-internal
 # network. Do not point this file at Hermes, OpenClaw, or n8n.
 #
-# Certificates succeed only after public DNS A/AAAA records for both names
+# Certificates succeed only after public DNS A/AAAA records for these names
 # point at this VPS and host firewall/security group allows 80 and 443.
-# Start this overlay and validate compose before any DNS cutover; ACME
-# retries after records move.
 
 {
 	email {$CADDY_ACME_EMAIL}
 }
 
-getmindfulspace.com, www.getmindfulspace.com {
+# Primary site
+kindease.app {
 	encode gzip
 	reverse_proxy mindful-space-app:3000
+}
+
+# Canonicalize www → apex
+www.kindease.app {
+	redir https://kindease.app{uri} permanent
+}
+
+# Legacy brand domains → KindEase
+getmindfulspace.com, www.getmindfulspace.com {
+	redir https://kindease.app{uri} permanent
 }

@@ -86,6 +86,8 @@ describe("static allowlist — always allowed", () => {
   });
 
   it.each([
+    "https://kindease.app",
+    "https://www.kindease.app",
     "https://getmindfulspace.com",
     "https://www.getmindfulspace.com",
   ])("allows the production origin %s", async (origin) => {

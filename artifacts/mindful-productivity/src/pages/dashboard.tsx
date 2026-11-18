@@ -229,6 +229,17 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessons, lessonsLoading, lessonsFetching, lessonsSuccess, language, activLesson?.id]);
 
+  useEffect(() => {
+    if (!user?.id || onboardingCompleted(user.id)) return;
+    try {
+      if (localStorage.getItem(`mindful_disclaimer_dismissed_${user.id}`)) {
+        setShowOnboarding(true);
+      }
+    } catch {
+      // Storage unavailable — wait for the disclaimer dismiss callback.
+    }
+  }, [user?.id]);
+
   // mood-card dismiss
   const [moodCardDismissed, setMoodCardDismissed] = useState(() => {
     try { return !!localStorage.getItem(moodCardDismissKey(user?.id ?? "")); } catch { return false; }

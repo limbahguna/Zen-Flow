@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Bot, Leaf, Moon, NotebookPen, Sparkles, Timer, Wind } from "lucide-react";
+import { KindEaseMark } from "@/components/KindEaseMark";
 import { useLanguage } from "@/context/LanguageContext";
 import type { LanguageCode } from "@/lib/translations";
 import {
@@ -72,7 +73,7 @@ export default function LandingPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", t("meta.description"));
     return () => {
-      document.title = "Mindful Space";
+      document.title = "KindEase";
     };
   }, [lang]);
 
@@ -101,15 +102,20 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center md:px-8">
           <a
             href="#landing-main"
-            className="flex min-w-0 items-center gap-2 rounded-lg text-[#E8EDE3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8D5B9]"
+            className="flex min-w-0 items-center gap-2.5 rounded-lg text-[#E8EDE3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8D5B9]"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E8EDE3]/10 ring-1 ring-[#E8EDE3]/20" aria-hidden="true">
-              <Leaf className="h-4 w-4 text-[#D7E3C8]" />
+            <span className="hidden sm:inline-flex" aria-hidden="true">
+              <KindEaseMark size={40} variant="tile" />
             </span>
-            <span className="truncate font-heading text-base font-semibold">Mindful Space</span>
+            <span className="inline-flex sm:hidden" aria-hidden="true">
+              <KindEaseMark size={36} variant="tile" />
+            </span>
+            <span className="truncate font-heading text-[20px] font-semibold leading-none sm:text-[22px]">
+              KindEase
+            </span>
           </a>
 
-          <nav className="order-3 hidden w-full items-center gap-1 sm:order-none sm:flex sm:w-auto sm:flex-1 sm:justify-center" aria-label="Mindful Space">
+          <nav className="order-3 hidden w-full items-center gap-1 sm:order-none sm:flex sm:w-auto sm:flex-1 sm:justify-center" aria-label="KindEase">
             <a href="#features" className={linkClass}>{t("nav.features")}</a>
             <a href="#how" className={linkClass}>{t("nav.how")}</a>
           </nav>

@@ -5,9 +5,9 @@ import supabase from "./supabase";
 
 export const NATIVE_AUTH_REDIRECT =
   "com.davidhendrya.mindfulspace://auth/callback";
-export const PRODUCTION_AUTH_REDIRECT = "https://getmindfulspace.com";
+export const PRODUCTION_AUTH_REDIRECT = "https://kindease.app";
 export const PRODUCTION_PASSWORD_RESET_REDIRECT =
-  "https://getmindfulspace.com/reset-password";
+  "https://kindease.app/reset-password";
 export const OAUTH_ERROR_EVENT = "mindful-oauth-error";
 export const OAUTH_FINISHED_EVENT = "mindful-oauth-finished";
 export const OAUTH_SUCCESS_EVENT = "mindful-oauth-success";
@@ -37,7 +37,12 @@ export function getWebAuthRedirect(location?: AuthLocation): string {
   }
 
   const hostname = activeLocation.hostname.toLowerCase();
-  if (hostname === "getmindfulspace.com" || hostname === "www.getmindfulspace.com") {
+  if (
+    hostname === "kindease.app" ||
+    hostname === "www.kindease.app" ||
+    hostname === "getmindfulspace.com" ||
+    hostname === "www.getmindfulspace.com"
+  ) {
     return PRODUCTION_AUTH_REDIRECT;
   }
 

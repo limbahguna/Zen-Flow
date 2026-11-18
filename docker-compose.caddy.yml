@@ -1,11 +1,11 @@
-# Public HTTPS reverse proxy for Mindful Space only.
+# Public HTTPS reverse proxy for KindEase only.
 #
 # This overlay is the only Compose file in this repo that publishes host
 # ports 80 and 443. The app container stays on 127.0.0.1:3010→3000.
 #
 # Do not attach this service to Hermes, OpenClaw, n8n, or Traefik networks.
 # Do not change those stacks. On this VPS those ports were empty; this
-# overlay uses them for Mindful Space ACME + HTTPS only.
+# overlay uses them for KindEase ACME + HTTPS only.
 #
 # Start after validating config, before DNS cutover:
 #   docker compose --project-name mindful-space \
@@ -13,8 +13,8 @@
 #   docker compose --project-name mindful-space \
 #     -f docker-compose.yml -f docker-compose.caddy.yml up -d
 #
-# ACME certificates are issued after getmindfulspace.com and
-# www.getmindfulspace.com resolve to this host.
+# ACME certificates are issued after kindease.app, www.kindease.app,
+# getmindfulspace.com, and www.getmindfulspace.com resolve to this host.
 
 services:
   caddy:

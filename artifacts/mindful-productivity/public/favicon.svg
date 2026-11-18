@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="7" fill="#1A1E1A"/>
-  <path d="M16 4C16 4 7 9.5 7 17.5C7 22.75 11.25 27 16 27C20.75 27 25 22.75 25 17.5C25 9.5 16 4 16 4Z" fill="#8FA680"/>
-  <line x1="16" y1="27" x2="16" y2="17" stroke="#1A1E1A" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="16" y1="21" x2="12" y2="17" stroke="#1A1E1A" stroke-width="1.2" stroke-linecap="round"/>
-  <line x1="16" y1="18" x2="20" y2="14" stroke="#1A1E1A" stroke-width="1.2" stroke-linecap="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><rect width="1024" height="1024" rx="224" fill="#2F4236"/><g transform="translate(512 512) scale(0.86) translate(-512 -512)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs><linearGradient id="w" x1="150" y1="0" x2="874" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#EFE7D6"/><stop offset="0.5" stop-color="#EFE7D6"/><stop offset="0.62" stop-color="#8FA889"/><stop offset="1" stop-color="#8FA889"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="312" stroke="#EFE7D6" stroke-width="26"/>
+  <path d="M150 556 C205 556 228 498 290 498 C365 498 392 604 452 604 C522 604 578 424 664 424 C742 424 784 548 874 548" stroke="url(#w)" stroke-width="30"/>
+</g></svg>

@@ -21,7 +21,7 @@ describe("public landing page", () => {
   afterEach(() => {
     cleanup();
     localStorage.clear();
-    document.title = "Mindful Space";
+    document.title = "KindEase";
     document.documentElement.removeAttribute("dir");
   });
 

@@ -105,8 +105,8 @@ describe("native Google OAuth", () => {
   it("uses the canonical production domain and preserves active preview origins", () => {
     expect(
       getWebAuthRedirect({
-        hostname: "www.getmindfulspace.com",
-        origin: "https://www.getmindfulspace.com",
+        hostname: "www.kindease.app",
+        origin: "https://www.kindease.app",
       }),
     ).toBe(PRODUCTION_AUTH_REDIRECT);
     expect(

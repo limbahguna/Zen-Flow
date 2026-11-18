@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://kindease.app/</loc>
+  </url>
+  <url>
+    <loc>https://kindease.app/auth</loc>
+  </url>
+  <url>
+    <loc>https://kindease.app/privacy</loc>
+  </url>
+  <url>
+    <loc>https://kindease.app/terms</loc>
+  </url>
+  <url>
+    <loc>https://kindease.app/crisis</loc>
+  </url>
+  <url>
+    <loc>https://kindease.app/delete-account</loc>
+  </url>
+</urlset>

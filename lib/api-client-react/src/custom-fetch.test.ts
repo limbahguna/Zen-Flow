@@ -47,10 +47,10 @@ describe("authenticated custom fetch", () => {
       headers: { "content-type": "application/json" },
     }));
     vi.stubGlobal("fetch", fetchSpy);
-    setBaseUrl("https://getmindfulspace.com");
+    setBaseUrl("https://kindease.app");
 
     await customFetch("/api/sleep/insights", { responseType: "json" });
 
-    expect(fetchSpy.mock.calls[0][0]).toBe("https://getmindfulspace.com/api/sleep/insights");
+    expect(fetchSpy.mock.calls[0][0]).toBe("https://kindease.app/api/sleep/insights");
   });
 });

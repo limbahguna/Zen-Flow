@@ -18,7 +18,8 @@ export function createApp(options: { publicDir?: string | null } = {}): Express 
   // Cross-origin cases that need explicit allowance:
   //   - Capacitor Android/iOS:  capacitor://localhost
   //   - Local dev / emulator:   http://localhost, https://localhost
-  //   - Canonical production domains: getmindfulspace.com and www
+  //   - Canonical production domains: kindease.app and www
+  //   - Legacy brand domains (temporary): getmindfulspace.com and www
   //   - Additional production domains: set via CORS_ALLOWED_ORIGINS env var
   //   - Replit Preview (dev only): https://<anything>.replit.dev
   //
@@ -49,6 +50,9 @@ export function createApp(options: { publicDir?: string | null } = {}): Express 
     "capacitor://localhost",
     "http://localhost",
     "https://localhost",
+    "https://kindease.app",
+    "https://www.kindease.app",
+    // Temporary: keep legacy brand origins while DNS/clients migrate.
     "https://getmindfulspace.com",
     "https://www.getmindfulspace.com",
   ]);

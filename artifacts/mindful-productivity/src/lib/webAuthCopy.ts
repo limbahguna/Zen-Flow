@@ -26,7 +26,7 @@ export function isWebAuthLanguage(value: unknown): value is WebAuthLanguage {
 export const AUTH_ARABIC_COPY: Record<string, string> = {
   "auth.language.label": "اختر لغتك",
   "auth.language.ariaLabel": "اختر اللغة",
-  "auth.tagline": "رفيقك الهادئ.",
+  "auth.tagline": "رفيقك اللطيف للهدوء.",
   "auth.google.redirecting": "جارٍ التحويل…",
   "auth.google.cta": "المتابعة بالحساب",
   "auth.google.failed": "تعذر تسجيل الدخول عبر Google",

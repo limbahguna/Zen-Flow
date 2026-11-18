@@ -746,7 +746,7 @@ describe("language handling", () => {
     // Injected text must NOT appear
     expect(prompt).not.toContain("pirate");
     // Real server-assembled prompt must be there
-    expect(prompt).toMatch(/mindfulness|productivity|coach/i);
+    expect(prompt).toMatch(/KindEase|productivity|coach/i);
   });
 });
 

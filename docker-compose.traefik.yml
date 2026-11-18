@@ -4,14 +4,13 @@
 #
 # Optional Traefik attachment. Not used for the pre-DNS staging test.
 #
-# Usage (only after a hostname is ready — still do not change getmindfulspace.com DNS):
+# Usage (only after a hostname is ready — primary public domain is kindease.app):
 #   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
 #
 # Requirements on the VPS:
 #   TRAEFIK_NETWORK  — existing Docker network Traefik is attached to
 #                      (docker network ls; inspect a Traefik container)
-#   TRAEFIK_HOST     — hostname this router should answer, not getmindfulspace.com
-#                      until you deliberately cut DNS over
+#   TRAEFIK_HOST     — hostname this router should answer (prefer kindease.app)
 #   TRAEFIK_ENTRYPOINT — usually websecure
 #   TRAEFIK_CERTRESOLVER — your existing Let's Encrypt resolver name, if any
 #

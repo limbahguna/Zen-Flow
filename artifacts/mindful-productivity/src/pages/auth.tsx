@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Leaf } from "lucide-react";
+import { KindEaseMark } from "@/components/KindEaseMark";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   OAUTH_ERROR_EVENT,
@@ -184,12 +184,10 @@ export default function AuthPage() {
         </div>
 
         {/* Logo + heading */}
-        <div className="flex flex-col items-center justify-center space-y-3 text-center">
-          <div className="w-16 h-16 bg-[#222822] border border-[#2D3A2E] rounded-2xl flex items-center justify-center mb-1">
-            <Leaf className="w-8 h-8 text-[#8FA680]" />
-          </div>
-          <h1 className="text-3xl font-heading font-bold text-[#E8EDE3]">Mindful Space</h1>
-          <p className="text-[#7A8A72]">{t("auth.tagline")}</p>
+        <div className="flex flex-col items-center justify-center text-center">
+          <KindEaseMark size={88} variant="tile" title="KindEase" />
+          <h1 className="mt-4 text-3xl font-heading font-bold text-[#E8EDE3]">KindEase</h1>
+          <p className="mt-3 text-[#7A8A72]">{t("auth.tagline")}</p>
         </div>
 
         <div className="bg-[#222822] border border-[#2D3A2E] rounded-2xl overflow-hidden">

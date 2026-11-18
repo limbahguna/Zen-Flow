@@ -12,16 +12,16 @@ import {
 
 describe("API origin normalization", () => {
   it("uses the canonical production origin without a path", () => {
-    expect(normalizeApiOrigin("https://getmindfulspace.com")).toBe(
+    expect(normalizeApiOrigin("https://kindease.app")).toBe(
       CANONICAL_PRODUCTION_API_ORIGIN,
     );
-    expect(normalizeApiOrigin("https://getmindfulspace.com/")).toBe(
+    expect(normalizeApiOrigin("https://kindease.app/")).toBe(
       CANONICAL_PRODUCTION_API_ORIGIN,
     );
-    expect(normalizeApiOrigin("https://getmindfulspace.com/api")).toBe(
+    expect(normalizeApiOrigin("https://kindease.app/api")).toBe(
       CANONICAL_PRODUCTION_API_ORIGIN,
     );
-    expect(normalizeApiOrigin("https://getmindfulspace.com/api/")).toBe(
+    expect(normalizeApiOrigin("https://kindease.app/api/")).toBe(
       CANONICAL_PRODUCTION_API_ORIGIN,
     );
   });
@@ -31,10 +31,10 @@ describe("API origin normalization", () => {
     expect(apiPath("subscription")).toBe("/api/subscription");
     expect(
       joinApiOriginAndPath(CANONICAL_PRODUCTION_API_ORIGIN, "/api/ai/coach"),
-    ).toBe("https://getmindfulspace.com/api/ai/coach");
+    ).toBe("https://kindease.app/api/ai/coach");
     expect(
-      joinApiOriginAndPath("https://getmindfulspace.com/api", "/api/healthz"),
-    ).toBe("https://getmindfulspace.com/api/healthz");
+      joinApiOriginAndPath("https://kindease.app/api", "/api/healthz"),
+    ).toBe("https://kindease.app/api/healthz");
   });
 });
 
@@ -120,7 +120,7 @@ describe("build-time API origin", () => {
       resolveBuildTimeApiBaseUrl({
         command: "build",
         mode: "android",
-        envValue: "https://getmindfulspace.com/api",
+        envValue: "https://kindease.app/api",
       }),
     ).toBe(CANONICAL_PRODUCTION_API_ORIGIN);
   });
@@ -165,7 +165,7 @@ describe("feature API URL resolution", () => {
 
   it("resolves subscription requests to the canonical /api path", () => {
     expect(resolveApiUrl("/api/subscription?region=global", androidProduction)).toBe(
-      "https://getmindfulspace.com/api/subscription?region=global",
+      "https://kindease.app/api/subscription?region=global",
     );
     expect(resolveApiUrl("/api/subscription?region=global", androidProduction)).not.toContain(
       "/api/api/",
@@ -174,15 +174,15 @@ describe("feature API URL resolution", () => {
 
   it("resolves AI Companion requests to the canonical /api path", () => {
     expect(resolveApiUrl("/api/ai/coach", androidProduction)).toBe(
-      "https://getmindfulspace.com/api/ai/coach",
+      "https://kindease.app/api/ai/coach",
     );
     expect(resolveApiUrl("/api/ai/reports", androidProduction)).toBe(
-      "https://getmindfulspace.com/api/ai/reports",
+      "https://kindease.app/api/ai/reports",
     );
   });
 
   it("keeps authorization independent from URL resolution", () => {
     const url = resolveApiUrl("/api/subscription", androidProduction);
-    expect(url.startsWith("https://getmindfulspace.com/api/")).toBe(true);
+    expect(url.startsWith("https://kindease.app/api/")).toBe(true);
   });
 });

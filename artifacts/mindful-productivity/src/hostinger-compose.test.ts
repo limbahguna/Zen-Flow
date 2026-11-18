@@ -33,7 +33,7 @@ describe("Hostinger compose isolation", () => {
     expect(envExample).toMatch(/^CADDY_ACME_EMAIL=$/m);
     expect(envExample).toContain("Let's Encrypt");
     expect(envExample).toContain(
-      "https://getmindfulspace.com,https://www.getmindfulspace.com,http://127.0.0.1:3010",
+      "https://kindease.app,https://www.kindease.app,https://getmindfulspace.com,https://www.getmindfulspace.com,http://127.0.0.1:3010",
     );
     expect(nginx).toContain("Do NOT install this file");
     expect(nginx).toContain("Caddy");
@@ -55,6 +55,9 @@ describe("Hostinger compose isolation", () => {
     expect(traefik).not.toMatch(/["']80:80/);
     expect(traefik).not.toMatch(/["']443:443/);
 
+    expect(caddyfile).toContain("kindease.app {");
+    expect(caddyfile).toContain("www.kindease.app {");
+    expect(caddyfile).toContain("redir https://kindease.app{uri} permanent");
     expect(caddyfile).toContain("getmindfulspace.com, www.getmindfulspace.com");
     expect(caddyfile).toContain("reverse_proxy mindful-space-app:3000");
     expect(caddyfile).toContain("email {$CADDY_ACME_EMAIL}");

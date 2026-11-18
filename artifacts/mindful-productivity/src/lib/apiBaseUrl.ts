@@ -1,4 +1,4 @@
-export const CANONICAL_PRODUCTION_API_ORIGIN = "https://getmindfulspace.com";
+export const CANONICAL_PRODUCTION_API_ORIGIN = "https://kindease.app";
 
 export type ApiRuntimeContext = {
   rawEnv?: string | undefined;

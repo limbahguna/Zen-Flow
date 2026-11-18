@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Offline — Mindful Space</title>
+  <title>Offline — KindEase</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,14 +20,15 @@
     }
 
     .icon-wrap {
-      width: 80px;
-      height: 80px;
-      background: #2D3A2E;
-      border-radius: 20px;
+      width: 96px;
+      height: 96px;
+      background: #2F4236;
+      border-radius: 21px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 24px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
     }
 
     h1 {
@@ -110,12 +111,20 @@
 <body>
 
   <div id="main">
-    <div class="icon-wrap">
-      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 6C22 6 8 14 8 26C8 33.732 14.268 40 22 40C29.732 40 36 33.732 36 26C36 14 22 6 22 6Z" fill="#8FA680"/>
-        <line x1="22" y1="40" x2="22" y2="24" stroke="#1A1E1A" stroke-width="2" stroke-linecap="round"/>
-        <line x1="22" y1="30" x2="16" y2="24" stroke="#1A1E1A" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="22" y1="26" x2="28" y2="20" stroke="#1A1E1A" stroke-width="1.5" stroke-linecap="round"/>
+    <div class="icon-wrap" role="img" aria-label="KindEase">
+      <svg width="67" height="67" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="offline-wave" x1="150" y1="0" x2="874" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#EFE7D6"/>
+            <stop offset="0.5" stop-color="#EFE7D6"/>
+            <stop offset="0.62" stop-color="#8FA889"/>
+            <stop offset="1" stop-color="#8FA889"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="512" cy="512" r="312" stroke="#EFE7D6" stroke-width="44" stroke-opacity="1"/>
+          <path d="M150 556 C205 556 228 498 290 498 C365 498 392 604 452 604 C522 604 578 424 664 424 C742 424 784 548 874 548" stroke="url(#offline-wave)" stroke-width="52" stroke-opacity="1"/>
+        </g>
       </svg>
     </div>
     <h1>You're offline</h1>

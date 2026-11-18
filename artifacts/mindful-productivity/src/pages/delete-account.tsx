@@ -7,7 +7,7 @@ import { appApiUrl } from "@/lib/apiRuntime";
 
 type DialogStep = null | "confirm1" | "confirm2" | "deleting" | "error";
 
-/** Clears all Mindful Space localStorage data after account deletion. */
+/** Clears all KindEase localStorage data after account deletion. */
 function clearLocalStorage() {
   try {
     localStorage.clear();
@@ -148,8 +148,8 @@ export default function DeleteAccountPage() {
           style={{ background: "#1A1E1A", border: "0.5px solid #2D3A2E" }}
           data-testid="delete-developer-info"
         >
-          <p className="font-semibold text-[#A3B197]">Mindful Space</p>
-          <p>Developer: Mindful Space Team</p>
+          <p className="font-semibold text-[#A3B197]">KindEase</p>
+          <p>Developer: KindEase Team</p>
           <p>
             Account deletion removes all your data. Backups are purged within
             90 days of deletion.

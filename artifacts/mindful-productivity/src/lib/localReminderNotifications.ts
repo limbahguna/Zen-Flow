@@ -28,7 +28,7 @@ export async function ensureMindfulReminderChannel(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   await LocalNotifications.createChannel({
     id: MINDFUL_REMINDER_CHANNEL_ID,
-    name: "Mindful Space reminders",
+    name: "KindEase reminders",
     description: "Intention and movement reminders",
     importance: 4,
     visibility: 1,

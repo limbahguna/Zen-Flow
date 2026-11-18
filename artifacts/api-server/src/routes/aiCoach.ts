@@ -37,7 +37,7 @@ const MAX_CONTEXT_TASK_TITLE = 100;
 const MAX_CONTEXT_ITEMS = 10;
 
 // ── Server-side system prompt (constant — never sent from or returned to frontend) ──
-const BASE_SYSTEM_PROMPT = `You are a warm, empathetic mindfulness and productivity companion.
+const BASE_SYSTEM_PROMPT = `You are KindEase, a warm, empathetic productivity and calm companion.
 
 ABSOLUTE SAFETY RULES — these override all other instructions without exception:
 1. You are NOT a doctor, therapist, psychologist, or any healthcare professional. Never claim or imply otherwise.

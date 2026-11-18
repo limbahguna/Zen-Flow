@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        emailRedirectTo: "https://getmindfulspace.com/auth",
+        emailRedirectTo: "https://kindease.app/auth",
       },
     });
     return { error };

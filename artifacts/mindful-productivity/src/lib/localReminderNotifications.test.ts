@@ -48,7 +48,7 @@ describe("verified local reminder scheduling", () => {
     mockPendingFromSchedule();
   });
 
-  it("creates the Mindful Space channel and verifies pending IDs", async () => {
+  it("creates the KindEase channel and verifies pending IDs", async () => {
     const ok = await scheduleVerifiedLocalNotifications([
       { id: 11, title: "T", body: "B" },
     ]);

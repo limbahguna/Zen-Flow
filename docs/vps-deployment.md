@@ -6,11 +6,11 @@ and n8n: unique project name, unique container names, its own Docker network.
 
 The app container never publishes host ports 80 or 443. Loopback
 `127.0.0.1:3010` is for SSH-tunnel staging. Public HTTPS for
-`getmindfulspace.com` and `www.getmindfulspace.com` uses the Caddy overlay
-(`docker-compose.caddy.yml`). That overlay is the only Compose file in this
-repo that binds 80/443.
+`kindease.app` (and legacy redirects from `getmindfulspace.com`) uses the
+Caddy overlay (`docker-compose.caddy.yml`). That overlay is the only Compose
+file in this repo that binds 80/443.
 
-Do not change DNS for `getmindfulspace.com` until the loopback tests pass.
+Do not change public DNS until the loopback tests pass.
 Do not install `deploy/nginx/zen-flow.conf` on this host — Caddy will own
 80/443 after cutover. Do not start `docker-compose.traefik.yml`.
 
@@ -89,8 +89,9 @@ Required for a working image and login:
 - `CADDY_ACME_EMAIL` — mailbox you can read (needed when the Caddy overlay starts; Let's Encrypt expiry notices)
 - `CORS_ALLOWED_ORIGINS` — comma-separated full origins, no trailing slash. The API splits on commas and trims each entry.
 
-`https://getmindfulspace.com` and `https://www.getmindfulspace.com` are already
-allowed in code. The SSH-tunnel origin is not. For staging, set:
+`https://kindease.app`, `https://www.kindease.app`, and the legacy
+`getmindfulspace.com` origins are already allowed in code. The SSH-tunnel
+origin is not. For staging, set:
 
 ```
 CORS_ALLOWED_ORIGINS=http://127.0.0.1:3010
@@ -100,10 +101,10 @@ To also list the public origins explicitly (optional; merges with the static
 list):
 
 ```
-CORS_ALLOWED_ORIGINS=https://getmindfulspace.com,https://www.getmindfulspace.com,http://127.0.0.1:3010
+CORS_ALLOWED_ORIGINS=https://kindease.app,https://www.kindease.app,https://getmindfulspace.com,https://www.getmindfulspace.com,http://127.0.0.1:3010
 ```
 
-Do not set `VITE_API_BASE_URL`. Do not put `getmindfulspace.com` in
+Do not set `VITE_API_BASE_URL`. Do not put `kindease.app` in
 `VITE_SUPABASE_URL`.
 
 Check hostnames and Caddy email presence only (do not print keys):
@@ -173,16 +174,18 @@ Same-origin `/api` calls go through the tunnel. Google OAuth may fail on this
 origin until Auth redirect URLs are updated; that is a separate Auth change
 and is not done here.
 
-`https://getmindfulspace.com` continues to hit the previous host until you
-change DNS.
+`https://kindease.app` is the primary public domain. Legacy
+`getmindfulspace.com` / `www.getmindfulspace.com` permanently redirect to
+`https://kindease.app{uri}` once DNS for those names also points here.
 
 ## Public HTTPS cutover (Caddy + DNS)
 
-Let's Encrypt will only issue certificates after `getmindfulspace.com` and
-`www.getmindfulspace.com` resolve to this VPS **and** ports 80/443 are reachable
-from the internet. Start Caddy **at the same time as the DNS change**, or
-**after** DNS already points here. Starting Caddy while DNS still points at
-another host will fail ACME and can leave visitors on the old site.
+Let's Encrypt will only issue certificates after `kindease.app`,
+`www.kindease.app` (and optionally the legacy `getmindfulspace.com` names)
+resolve to this VPS **and** ports 80/443 are reachable from the internet.
+Start Caddy **at the same time as the DNS change**, or **after** DNS already
+points here. Starting Caddy while DNS still points at another host will fail
+ACME and can leave visitors on the old site.
 
 ### 1. Validate the merged Compose file (does not start containers)
 
@@ -201,8 +204,10 @@ Open 80/443 on the VPS firewall / security group if they are not already open.
 
 At the DNS provider, set A (and AAAA if you use IPv6) for:
 
-- `getmindfulspace.com`
-- `www.getmindfulspace.com`
+- `kindease.app`
+- `www.kindease.app`
+- `getmindfulspace.com` (legacy redirect)
+- `www.getmindfulspace.com` (legacy redirect)
 
 to this VPS. Then:
 
@@ -225,8 +230,10 @@ docker compose --project-name mindful-space \
 ```
 
 ```bash
-curl -i https://getmindfulspace.com/api/healthz
-curl -I https://www.getmindfulspace.com/
+curl -i https://kindease.app/api/healthz
+curl -I https://www.kindease.app/
+curl -I https://getmindfulspace.com/
+# expect 301 → https://kindease.app/
 ```
 
 Loopback staging (`127.0.0.1:3010`) can stay published during public HTTPS.

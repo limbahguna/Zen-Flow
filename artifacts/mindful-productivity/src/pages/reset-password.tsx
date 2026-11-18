@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { Leaf } from "lucide-react";
+import { KindEaseMark } from "@/components/KindEaseMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,14 +58,12 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md bg-[#222822] border border-[#2D3A2E] rounded-2xl p-6 space-y-5">
-        <div className="flex flex-col items-center text-center gap-3">
-          <div className="w-14 h-14 bg-[#1A1E1A] border border-[#2D3A2E] rounded-2xl flex items-center justify-center">
-            <Leaf className="w-7 h-7 text-[#8FA680]" />
-          </div>
-          <h1 className="text-2xl font-heading font-bold text-[#E8EDE3]">
+        <div className="flex flex-col items-center text-center">
+          <KindEaseMark size={88} variant="tile" title="KindEase" />
+          <h1 className="mt-4 text-2xl font-heading font-bold text-[#E8EDE3]">
             {t("auth.reset.title")}
           </h1>
-          <p className="text-sm text-[#7A8A72]">
+          <p className="mt-3 text-sm text-[#7A8A72]">
             {unavailable ? callbackError ?? t("auth.reset.invalid") : t("auth.reset.subtitle")}
           </p>
         </div>
