@@ -32,10 +32,17 @@ import { LanguageProfileSync } from "@/components/LanguageProfileSync";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { Capacitor } from "@capacitor/core";
 import { useIntentions } from "@/hooks/useIntentions";
-import { clearDeviceIntentionNotifications, intentionPathFromNotificationExtra, scheduleIntentionReminder } from "@/lib/intentionNotifications";
+import { clearDeviceIntentionNotifications, scheduleIntentionReminder } from "@/lib/intentionNotifications";
 import { ensureMindfulReminderChannel } from "@/lib/localReminderNotifications";
 import { scheduleMovementReminder } from "@/lib/movementNotifications";
 import { loadMovementConfig, movementReminderCopy } from "@/services/reminderService";
+import {
+  loadDailyRhythmConfig,
+  pathFromNotificationExtra,
+  scheduleDailyRhythmReminders,
+} from "@/lib/dailyRhythmNotifications";
+import { dailyRhythmCopyFromTranslations } from "@/lib/dailyRhythmCopy";
+import { DailyRhythmPrompt } from "@/components/DailyRhythmPrompt";
 
 function NotificationNavigation() {
   const [, setLocation] = useLocation();
@@ -43,7 +50,7 @@ function NotificationNavigation() {
     if (!Capacitor.isNativePlatform()) return;
     let remove: (() => Promise<void>) | undefined;
     void LocalNotifications.addListener("localNotificationActionPerformed", (event) => {
-      const path = intentionPathFromNotificationExtra(event.notification.extra);
+      const path = pathFromNotificationExtra(event.notification.extra);
       if (path) setLocation(path);
     }).then((handle) => { remove = () => handle.remove(); });
     return () => { void remove?.(); };
@@ -89,6 +96,31 @@ function MovementNotificationSync() {
       await scheduleMovementReminder(config, movementReminderCopy(config, t), false);
     })();
   }, [t]);
+
+  return null;
+}
+
+function DailyRhythmNotificationSync() {
+  const { t } = useLanguage();
+  const { data: intentions = [] } = useIntentions();
+  const fingerprint = intentions
+    .map((item) => `${item.id}:${item.reminder_choice}:${item.reminder_time}:${item.status}`)
+    .join("|");
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const config = loadDailyRhythmConfig();
+    if (!config.masterEnabled) return;
+    void (async () => {
+      await ensureMindfulReminderChannel();
+      await scheduleDailyRhythmReminders({
+        config,
+        copy: dailyRhythmCopyFromTranslations(t),
+        requestPermission: false,
+        intentions,
+      });
+    })();
+  }, [t, fingerprint]);
 
   return null;
 }
@@ -189,9 +221,11 @@ function UserScopedApplication() {
           <LanguageProfileSync />
           <IntentionNotificationSync />
           <MovementNotificationSync />
+          <DailyRhythmNotificationSync />
           <CoachProvider key={userId ?? "signed-out"} userId={userId}>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <NotificationNavigation />
+              <DailyRhythmPrompt />
               <Router />
             </WouterRouter>
           </CoachProvider>

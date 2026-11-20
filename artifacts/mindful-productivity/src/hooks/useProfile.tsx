@@ -15,6 +15,8 @@ export interface ProfileData {
   procrastination_reasons: string[];
   initial_mood: string;
   profile_completed: boolean;
+  /** First-run Daily Rhythm prompt completed (user_metadata). */
+  daily_rhythm_prompt_completed?: boolean;
 }
 
 export function useProfile() {

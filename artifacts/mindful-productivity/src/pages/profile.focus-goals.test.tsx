@@ -30,6 +30,18 @@ vi.mock("@/hooks/useAnxietyChecks", () => ({
   useAnxietyChecks: () => ({ data: [] }),
 }));
 
+vi.mock("@/hooks/useIntentions", () => ({
+  useIntentions: () => ({ data: [] }),
+}));
+
+vi.mock("@/components/DailyRhythmSettings", () => ({
+  DailyRhythmSettings: () => null,
+}));
+
+vi.mock("@/components/MovementReminderSettings", () => ({
+  MovementReminderSettings: () => null,
+}));
+
 vi.mock("wouter", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wouter")>();
   return {

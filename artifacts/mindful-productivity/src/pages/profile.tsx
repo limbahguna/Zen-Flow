@@ -5,6 +5,7 @@ import { LogOut, ListChecks, CheckCircle2, NotebookPen, HeartPulse, Timer, Shiel
 import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { MovementReminderSettings } from "@/components/MovementReminderSettings";
+import { DailyRhythmSettings } from "@/components/DailyRhythmSettings";
 import { MovementSession } from "@/components/MovementSession";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -327,7 +328,8 @@ export default function ProfilePage() {
           </select>
         </div>
 
-        {/* ── Movement Reminder ───────────────────────────────────────── */}
+        {/* ── Daily Rhythm + Movement Reminder ────────────────────────── */}
+        <DailyRhythmSettings />
         <MovementReminderSettings onStartSession={() => setMovementSessionOpen(true)} />
 
         {/* ── Sign out ────────────────────────────────────────────────── */}

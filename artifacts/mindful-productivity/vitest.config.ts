@@ -8,6 +8,8 @@ export default defineConfig({
     environment: "jsdom",
     globals: false,
     setupFiles: [],
+    // Integration/UX suites can exceed the default 5s under Windows load.
+    testTimeout: 15_000,
   },
   resolve: {
     alias: {
