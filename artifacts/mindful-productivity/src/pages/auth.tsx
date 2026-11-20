@@ -18,17 +18,9 @@ import {
 } from "@/lib/native";
 import LanguageSelector from "@/components/LanguageSelector";
 import { trackEvent } from "@/lib/analytics";
-import {
-  getStoredLandingLanguage,
-  isLandingLanguage,
-  storeLandingLanguage,
-} from "@/lib/landingCopy";
-import {
-  WEB_AUTH_ARABIC,
-  webAuthText,
-  type WebAuthLanguage,
-} from "@/lib/webAuthCopy";
-import type { LanguageCode } from "@/lib/translations";
+import { isLandingLanguage, storeLandingLanguage } from "@/lib/landingCopy";
+import { isRTL } from "@/lib/translations";
+import { webAuthText, type WebAuthLanguage } from "@/lib/webAuthCopy";
 
 export default function AuthPage() {
   const { signIn, signUp, user, loading: authLoading } = useAuth();
@@ -36,13 +28,8 @@ export default function AuthPage() {
   const { toast } = useToast();
   const { language, setLanguage, t: translate } = useLanguage();
   const native = isNativeApp();
-  const [webLang, setWebLang] = useState<WebAuthLanguage>(() => {
-    if (native) return language;
-    const stored = getStoredLandingLanguage(language);
-    return stored === WEB_AUTH_ARABIC ? WEB_AUTH_ARABIC : language;
-  });
-  const t = (key: string) => webAuthText(native ? language : webLang, key, translate);
-  const rtl = !native && webLang === WEB_AUTH_ARABIC;
+  const t = (key: string) => webAuthText(language, key, translate);
+  const rtl = isRTL(language);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -162,23 +149,21 @@ export default function AuthPage() {
   };
 
   function onWebLanguageChange(next: WebAuthLanguage) {
-    setWebLang(next);
-    if (isLandingLanguage(next)) storeLandingLanguage(next);
-    if (next !== WEB_AUTH_ARABIC) setLanguage(next as LanguageCode);
+    if (!native && isLandingLanguage(next)) storeLandingLanguage(next);
+    setLanguage(next);
   }
 
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center p-4 bg-background"
       dir={rtl ? "rtl" : "ltr"}
-      lang={native ? language : webLang}
+      lang={language}
       data-testid="auth-page"
     >
       <div className="w-full max-w-md space-y-6">
         <div className="flex justify-end">
           <LanguageSelector
-            includeArabic={!native}
-            value={native ? language : webLang}
+            value={language}
             onLanguageChange={onWebLanguageChange}
           />
         </div>
@@ -231,7 +216,7 @@ export default function AuthPage() {
 
               {/* Sign In / Sign Up tabs */}
               <TabsList
-                className={`flex h-11 w-full rounded-xl bg-[#1E241E] p-1 ${rtl ? "flex-row-reverse" : ""}`}
+                className="flex h-11 w-full rounded-xl bg-[#1E241E] p-1"
               >
                 <TabsTrigger
                   value="signin"

@@ -22,7 +22,7 @@ import type { LanguageCode } from "@/lib/translations";
 
 // ── Helper component: a minimal consumer that shows translated strings
 // and a <select> to change the language (mirrors the real Profile page).
-// Only contains EN / ID / JA options — retired languages are not selectable.
+// Contains EN / ID / JA / AR options — retired languages are not selectable.
 function LanguageSwitcher() {
   const { language, setLanguage, t } = useLanguage();
   return (
@@ -39,6 +39,7 @@ function LanguageSwitcher() {
         <option value="en">English</option>
         <option value="id">Bahasa Indonesia</option>
         <option value="ja">日本語</option>
+        <option value="ar">العربية</option>
       </select>
     </div>
   );
@@ -77,31 +78,29 @@ afterEach(() => {
   try { localStorage.removeItem("mindful_language"); } catch {}
 });
 
-// ── 1. SUPPORTED_LANGUAGES / LANGUAGE_OPTIONS contain only en/id/ja ───────────
+// ── 1. SUPPORTED_LANGUAGES / LANGUAGE_OPTIONS contain en/id/ja/ar ─────────────
 describe("SUPPORTED_LANGUAGES and LANGUAGE_OPTIONS — launch scope only", () => {
-  it("SUPPORTED_LANGUAGES has exactly en, id, ja", () => {
+  it("SUPPORTED_LANGUAGES has exactly ar, en, id, ja", () => {
     const codes = Object.keys(SUPPORTED_LANGUAGES).sort();
-    expect(codes).toEqual(["en", "id", "ja"]);
+    expect(codes).toEqual(["ar", "en", "id", "ja"]);
   });
 
-  it("SUPPORTED_LANGUAGES does NOT contain es, de, ar, zh", () => {
+  it("SUPPORTED_LANGUAGES does NOT contain es, de, zh", () => {
     const codes = Object.keys(SUPPORTED_LANGUAGES);
     expect(codes).not.toContain("es");
     expect(codes).not.toContain("de");
-    expect(codes).not.toContain("ar");
     expect(codes).not.toContain("zh");
   });
 
-  it("LANGUAGE_OPTIONS selector list has exactly 3 entries (en/id/ja)", () => {
+  it("LANGUAGE_OPTIONS selector list has exactly 4 entries (en/id/ja/ar)", () => {
     const codes = LANGUAGE_OPTIONS.map((o) => o.code).sort();
-    expect(codes).toEqual(["en", "id", "ja"]);
+    expect(codes).toEqual(["ar", "en", "id", "ja"]);
   });
 
-  it("LANGUAGE_OPTIONS does NOT include es, de, ar, zh as selectable options", () => {
+  it("LANGUAGE_OPTIONS does NOT include es, de, zh as selectable options", () => {
     const codes = LANGUAGE_OPTIONS.map((o) => o.code);
     expect(codes).not.toContain("es");
     expect(codes).not.toContain("de");
-    expect(codes).not.toContain("ar");
     expect(codes).not.toContain("zh");
   });
 });
@@ -241,7 +240,7 @@ describe("LanguageProvider — localStorage persistence", () => {
 
 // ── 5. Legacy / invalid localStorage values normalize to 'en' ─────────────────
 describe("LanguageProvider — legacy value normalization", () => {
-  const legacyCodes = ["es", "de", "ar", "zh", "xx"] as const;
+  const legacyCodes = ["es", "de", "zh", "xx"] as const;
 
   for (const legacy of legacyCodes) {
     it(`legacy value "${legacy}" normalizes to "en" on mount and persists as "en"`, () => {
@@ -259,6 +258,30 @@ describe("LanguageProvider — legacy value normalization", () => {
       localStorage.removeItem("mindful_language");
     });
   }
+});
+
+// ── 5b. Arabic is a supported, RTL language ───────────────────────────────────
+describe("LanguageProvider — Arabic", () => {
+  it("restores persisted 'ar' and applies dir=rtl / lang=ar to <html>", () => {
+    localStorage.setItem("mindful_language", "ar");
+    render(<Wrapper />);
+    expect(screen.getByTestId("current-lang").textContent).toBe("ar");
+    expect(screen.getByTestId("nav-home-label").textContent).not.toBe("Home");
+    expect(document.documentElement.dir).toBe("rtl");
+    expect(document.documentElement.lang).toBe("ar");
+    cleanup();
+    localStorage.removeItem("mindful_language");
+  });
+
+  it("switching from ar back to en restores dir=ltr", async () => {
+    const user = userEvent.setup();
+    render(<Wrapper />);
+    await user.selectOptions(screen.getByTestId("lang-select"), "ar");
+    expect(document.documentElement.dir).toBe("rtl");
+    await user.selectOptions(screen.getByTestId("lang-select"), "en");
+    expect(document.documentElement.dir).toBe("ltr");
+    expect(localStorage.getItem("mindful_language")).toBe("en");
+  });
 });
 
 // ── 6. Unknown language code is rejected (allowlist guard) ────────────────────

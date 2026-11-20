@@ -89,7 +89,7 @@ export default function ProgramDetailPage() {
             aria-label={t("common.back")}
             data-testid="program-detail-back"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="rtl:rotate-180 h-4 w-4" />
           </button>
           <h1 className="font-heading text-lg font-bold text-[#E8EDE3]">
             {program ? t(program.titleKey) : t("programs.page.title")}

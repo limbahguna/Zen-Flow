@@ -12,7 +12,7 @@ export type PrimaryGoal = (typeof PRIMARY_GOALS)[number];
 export const PREFERRED_DURATIONS = [3, 5, 10, 15] as const;
 export type PreferredDurationMinutes = (typeof PREFERRED_DURATIONS)[number];
 
-export const WELLNESS_LOCALES = ["en", "id", "ja"] as const;
+export const WELLNESS_LOCALES = ["en", "id", "ja", "ar"] as const;
 export type WellnessLocale = (typeof WELLNESS_LOCALES)[number];
 
 export const PROGRAM_SLUGS = ["calm-reset", "better-sleep", "focus-habit"] as const;

@@ -545,7 +545,7 @@ export default function DashboardPage() {
             type="button"
             data-testid="todays-focus"
             onClick={() => setLocation(`/practice?tab=intentions&intention=${activeIntention.id}`)}
-            className="w-full rounded-2xl border border-[#3D4D35] bg-[#222822] p-4 text-left"
+            className="w-full rounded-2xl border border-[#3D4D35] bg-[#222822] p-4 text-start"
           >
             <p className="mb-1 text-[11px] uppercase tracking-[0.16em] text-[#8FA680]">
               {language === "id" ? "Fokus hari ini" : language === "ja" ? "今日のフォーカス" : "Today's focus"}
@@ -713,7 +713,7 @@ export default function DashboardPage() {
               data-testid="todays-lesson-card"
               aria-describedby="todays-lesson-reason"
               onClick={() => setActivLesson(todaysLesson)}
-              className="w-full text-left flex items-center gap-3.5 rounded-2xl border border-[#2D3A2E] p-4 hover:border-[#3D4D35] transition-colors duration-200"
+              className="w-full text-start flex items-center gap-3.5 rounded-2xl border border-[#2D3A2E] p-4 hover:border-[#3D4D35] transition-colors duration-200"
               style={{ background: "linear-gradient(135deg, #222822 0%, #1E241E 100%)" }}
             >
               <div
@@ -744,7 +744,7 @@ export default function DashboardPage() {
                   })}
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#7A8A72] shrink-0" />
+              <ChevronRight className="rtl:rotate-180 w-4 h-4 text-[#7A8A72] shrink-0" />
             </button>
           );
         })()}
@@ -772,12 +772,12 @@ export default function DashboardPage() {
           >
             {dailyMood ? MOOD_FACE_KEYS.find(m => m.storageLabel === dailyMood)?.emoji ?? "😐" : "😊"}
           </motion.span>
-          <span className="flex-1 text-sm text-left text-[#A3B197]">
+          <span className="flex-1 text-sm text-start text-[#A3B197]">
             {dailyMood
               ? t("dashboard.moodPill.update").replace("{mood}", moodLabel)
               : t("dashboard.moodPill.prompt")}
           </span>
-          <ChevronRight className="w-4 h-4 text-[#7A8A72]" />
+          <ChevronRight className="rtl:rotate-180 w-4 h-4 text-[#7A8A72]" />
         </button>
 
         {/* ── Mood mini-timeline ──────────────────────────────────────── */}
@@ -907,7 +907,7 @@ export default function DashboardPage() {
               key={q.testId}
               onClick={q.action}
               data-testid={q.testId}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-[#2D3A2E] bg-[#222822] text-left hover:border-[#3D4D35] hover:bg-[#1E241E] transition-colors duration-200"
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-[#2D3A2E] bg-[#222822] text-start hover:border-[#3D4D35] hover:bg-[#1E241E] transition-colors duration-200"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               whileTap={{ scale: 0.985 }}
             >
@@ -918,7 +918,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-semibold text-[#E8EDE3]">{q.title}</p>
                 <p className="text-xs text-[#7A8A72] mt-0.5">{q.sub}</p>
               </div>
-              <ArrowRight className="w-4 h-4 text-[#7A8A72] shrink-0" />
+              <ArrowRight className="rtl:rotate-180 w-4 h-4 text-[#7A8A72] shrink-0" />
             </motion.button>
           ))}
         </section>
@@ -984,7 +984,7 @@ export default function DashboardPage() {
         {/* ── Sleep Support Link ──────────────────────────────────────── */}
         <button
           onClick={() => setLocation("/sleep")}
-          className="w-full flex items-center gap-4 rounded-2xl border p-4 text-left transition-transform active:scale-[0.98] mt-3"
+          className="w-full flex items-center gap-4 rounded-2xl border p-4 text-start transition-transform active:scale-[0.98] mt-3"
           style={{
             background: "linear-gradient(135deg, #11151F 0%, #0D1018 100%)",
             borderColor: "#1C263A",
@@ -998,7 +998,7 @@ export default function DashboardPage() {
             <h3 className="font-heading font-bold text-[#E8EDE3] text-base">{t("sleep.hub.title")}</h3>
             <p className="text-xs text-[#7A8A9E] mt-0.5 truncate">{t("sleep.hub.subtitle")}</p>
           </div>
-          <ChevronRight className="w-5 h-5 text-[#4D5B70] shrink-0" />
+          <ChevronRight className="rtl:rotate-180 w-5 h-5 text-[#4D5B70] shrink-0" />
         </button>
       </main>
 

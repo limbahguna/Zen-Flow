@@ -12,6 +12,7 @@ const COPY = {
   en: { active:"Active intentions", history:"History", empty:"Set a gentle intention and choose one small next step.", add:"New intention", done:"Mark done", postpone:"Postpone", edit:"Edit reminder", letGo:"Let it go", statuses:{active:"Active",done:"Done",postponed:"Postponed",let_go:"Let go"} },
   id: { active:"Niat aktif", history:"Riwayat", empty:"Tetapkan niat yang lembut dan pilih satu langkah kecil.", add:"Niat baru", done:"Tandai selesai", postpone:"Tunda", edit:"Ubah pengingat", letGo:"Lepaskan", statuses:{active:"Aktif",done:"Selesai",postponed:"Ditunda",let_go:"Dilepas"} },
   ja: { active:"進行中の目標", history:"履歴", empty:"やさしい目標と、次の小さな一歩を決めましょう。", add:"新しい目標", done:"完了", postpone:"延期", edit:"リマインダーを編集", letGo:"手放す", statuses:{active:"進行中",done:"完了",postponed:"延期",let_go:"手放した"} },
+  ar: { active:"نوايا نشطة", history:"السجل", empty:"ضع نية لطيفة واختر خطوة صغيرة تالية.", add:"نية جديدة", done:"تعليم كمنتهٍ", postpone:"تأجيل", edit:"تعديل التذكير", letGo:"اتركها", statuses:{active:"نشط",done:"منتهٍ",postponed:"مؤجّل",let_go:"متروك"} },
 };
 
 function ReminderSummary({ intention }: { intention: Intention }) {

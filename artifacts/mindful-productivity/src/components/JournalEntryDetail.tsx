@@ -80,13 +80,13 @@ export function JournalEntryDetail({ entry, onClose, onEdit }: JournalEntryDetai
             aria-label={t("journal.detail.close")}
             data-testid="button-detail-close"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="rtl:rotate-180 w-5 h-5" />
             <span className="text-sm font-medium">{t("journal.detail.close")}</span>
           </button>
-          <h1 className="font-heading font-bold text-[#E8EDE3] ml-3">{t("journal.detail.title")}</h1>
+          <h1 className="font-heading font-bold text-[#E8EDE3] ms-3">{t("journal.detail.title")}</h1>
           <button
             onClick={onEdit}
-            className="ml-auto flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[#2D3A2E] text-[#C8D5B9] text-sm font-medium hover:bg-[#3D4D35] transition-colors"
+            className="ms-auto flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[#2D3A2E] text-[#C8D5B9] text-sm font-medium hover:bg-[#3D4D35] transition-colors"
             data-testid="button-edit-entry"
           >
             <Pencil className="w-4 h-4" />

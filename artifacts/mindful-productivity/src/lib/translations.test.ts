@@ -1,8 +1,8 @@
 /**
  * Unit tests for translations.ts pure functions.
  *
- * Scope: EN / ID / JA launch languages only.
- * ES / DE / AR / ZH are retired and must NOT appear in SUPPORTED_LANGUAGES.
+ * Scope: EN / ID / JA / AR launch languages (AR is RTL).
+ * ES / DE / ZH are retired and must NOT appear in SUPPORTED_LANGUAGES.
  *
  * Run:  pnpm --filter @workspace/mindful-productivity run test
  *
@@ -33,6 +33,13 @@ describe("t() — translation lookup", () => {
 
   it("returns Japanese string for ja", () => {
     expect(t("ja", "nav.home")).toBe("ホーム");
+  });
+
+  it("returns Arabic string for ar (not the English fallback)", () => {
+    const value = t("ar", "nav.home");
+    expect(value).not.toBe("nav.home");
+    expect(value).not.toBe(t("en", "nav.home"));
+    expect(value).toMatch(/[؀-ۿ]/);
   });
 
   it("falls back to English when key is missing in target language", () => {
@@ -607,28 +614,31 @@ describe("journal data descriptions", () => {
   });
 });
 
-// ── 2. isRTL() — all launch languages are LTR ─────────────────────────────────
+// ── 2. isRTL() — Arabic is RTL, the rest LTR ─────────────────────────────────
 describe("isRTL()", () => {
-  it("returns false for all EN/ID/JA launch languages", () => {
+  it("returns false for EN/ID/JA", () => {
     const ltr: LanguageCode[] = ["en", "id", "ja"];
     for (const lang of ltr) {
       expect(isRTL(lang)).toBe(false);
     }
   });
+
+  it("returns true for Arabic", () => {
+    expect(isRTL("ar")).toBe(true);
+  });
 });
 
-// ── 3. SUPPORTED_LANGUAGES allowlist — only en/id/ja ─────────────────────────
+// ── 3. SUPPORTED_LANGUAGES allowlist — en/id/ja/ar ───────────────────────────
 describe("SUPPORTED_LANGUAGES", () => {
-  it("contains exactly the 3 launch language codes: en, id, ja", () => {
+  it("contains exactly the 4 launch language codes: ar, en, id, ja", () => {
     const codes = Object.keys(SUPPORTED_LANGUAGES).sort();
-    expect(codes).toEqual(["en", "id", "ja"]);
+    expect(codes).toEqual(["ar", "en", "id", "ja"]);
   });
 
-  it("does NOT contain retired codes es, de, ar, zh", () => {
+  it("does NOT contain retired codes es, de, zh", () => {
     const codes = Object.keys(SUPPORTED_LANGUAGES);
     expect(codes).not.toContain("es");
     expect(codes).not.toContain("de");
-    expect(codes).not.toContain("ar");
     expect(codes).not.toContain("zh");
   });
 
@@ -640,22 +650,25 @@ describe("SUPPORTED_LANGUAGES", () => {
   });
 });
 
-// ── 4. LANGUAGE_OPTIONS selector — only en/id/ja selectable ──────────────────
+// ── 4. LANGUAGE_OPTIONS selector — en/id/ja/ar selectable ────────────────────
 describe("LANGUAGE_OPTIONS", () => {
-  it("contains exactly 3 options", () => {
-    expect(LANGUAGE_OPTIONS).toHaveLength(3);
+  it("contains exactly 4 options", () => {
+    expect(LANGUAGE_OPTIONS).toHaveLength(4);
   });
 
-  it("option codes are exactly en, id, ja", () => {
+  it("option codes are exactly ar, en, id, ja", () => {
     const codes = LANGUAGE_OPTIONS.map((o) => o.code).sort();
-    expect(codes).toEqual(["en", "id", "ja"]);
+    expect(codes).toEqual(["ar", "en", "id", "ja"]);
   });
 
-  it("does NOT contain es, de, ar, zh as selectable options", () => {
+  it("includes ar as a selectable option", () => {
+    expect(LANGUAGE_OPTIONS.map((o) => o.code)).toContain("ar");
+  });
+
+  it("does NOT contain es, de, zh as selectable options", () => {
     const codes = LANGUAGE_OPTIONS.map((o) => o.code);
     expect(codes).not.toContain("es");
     expect(codes).not.toContain("de");
-    expect(codes).not.toContain("ar");
     expect(codes).not.toContain("zh");
   });
 
@@ -704,10 +717,10 @@ describe("getStoredLanguage()", () => {
     expect(localStorage.getItem("mindful_language")).toBe("en");
   });
 
-  it("normalizes legacy 'ar' to 'en' and persists normalization", () => {
+  it("returns stored 'ar' when stored", () => {
     localStorage.setItem("mindful_language", "ar");
-    expect(getStoredLanguage()).toBe("en");
-    expect(localStorage.getItem("mindful_language")).toBe("en");
+    expect(getStoredLanguage()).toBe("ar");
+    expect(localStorage.getItem("mindful_language")).toBe("ar");
   });
 
   it("normalizes legacy 'zh' to 'en' and persists normalization", () => {
@@ -721,8 +734,8 @@ describe("getStoredLanguage()", () => {
     expect(getStoredLanguage()).toBe("en");
   });
 
-  it("stores all 3 supported language codes correctly", () => {
-    const codes: LanguageCode[] = ["en", "id", "ja"];
+  it("stores all 4 supported language codes correctly", () => {
+    const codes: LanguageCode[] = ["en", "id", "ja", "ar"];
     for (const code of codes) {
       localStorage.setItem("mindful_language", code);
       expect(getStoredLanguage()).toBe(code);
@@ -738,6 +751,15 @@ describe("getStoredLanguage()", () => {
     expect(localStorage.getItem("mindful_language")).toBe("id");
   });
 
+  it("detects Arabic from the browser when no preference is stored", () => {
+    Object.defineProperty(window.navigator, "language", {
+      configurable: true,
+      value: "ar-SA",
+    });
+    expect(getStoredLanguage()).toBe("ar");
+    expect(localStorage.getItem("mindful_language")).toBe("ar");
+  });
+
   it("detects Japanese from the browser when no preference is stored", () => {
     Object.defineProperty(window.navigator, "language", {
       configurable: true,
@@ -748,9 +770,21 @@ describe("getStoredLanguage()", () => {
   });
 });
 
-// ── 6. Translation key parity across EN / ID / JA ────────────────────────────
-describe("translation key parity — EN / ID / JA", () => {
+// ── 6. Translation key parity across EN / ID / JA / AR ───────────────────────
+describe("translation key parity — EN / ID / JA / AR", () => {
   const englishKeys = getTranslationKeys("en").sort();
+
+  it("has every English key present in ar, id and ja", () => {
+    for (const lang of ["ar", "id", "ja"] as LanguageCode[]) {
+      const keys = new Set(getTranslationKeys(lang));
+      const missing = englishKeys.filter((key) => !keys.has(key));
+      expect(missing, `${lang} is missing keys`).toEqual([]);
+    }
+  });
+
+  it("uses exactly the same key set for Arabic", () => {
+    expect(getTranslationKeys("ar").sort()).toEqual(englishKeys);
+  });
 
   it("uses exactly the same key set for Indonesian", () => {
     expect(getTranslationKeys("id").sort()).toEqual(englishKeys);
@@ -761,11 +795,12 @@ describe("translation key parity — EN / ID / JA", () => {
   });
 });
 
-// ── 7. HTML language direction — always LTR for launch scope ─────────────────
+// ── 7. HTML language direction — RTL only for Arabic ─────────────────────────
 describe("document RTL side-effect", () => {
-  it("isRTL returns false for all EN/ID/JA — HTML stays LTR", () => {
+  it("isRTL is false for EN/ID/JA (HTML stays LTR) and true for AR", () => {
     expect(isRTL("en")).toBe(false);
     expect(isRTL("id")).toBe(false);
     expect(isRTL("ja")).toBe(false);
+    expect(isRTL("ar")).toBe(true);
   });
 });

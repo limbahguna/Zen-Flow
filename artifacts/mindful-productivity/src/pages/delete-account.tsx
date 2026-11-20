@@ -52,7 +52,7 @@ export default function DeleteAccountPage() {
 
   // The expected confirmation word differs per locale
   const CONFIRM_WORD =
-    language === "id" ? "HAPUS" : language === "ja" ? "DELETE" : "DELETE";
+    language === "id" ? "HAPUS" : language === "ar" ? "حذف" : "DELETE";
 
   async function handleDelete() {
     if (!session?.access_token) return;
@@ -108,11 +108,11 @@ export default function DeleteAccountPage() {
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
           <button
             onClick={() => window.history.back()}
-            className="p-2 -ml-2 rounded-lg hover:bg-[#1E241E] transition-colors"
+            className="p-2 -ms-2 rounded-lg hover:bg-[#1E241E] transition-colors"
             aria-label={t("delete.nav.back")}
             data-testid="delete-back-btn"
           >
-            <ArrowLeft className="w-5 h-5 text-[#A3B197]" />
+            <ArrowLeft className="rtl:rotate-180 w-5 h-5 text-[#A3B197]" />
           </button>
           <h1 className="font-heading font-bold text-base text-[#E8EDE3]">
             {t("delete.title")}
@@ -218,7 +218,7 @@ export default function DeleteAccountPage() {
                 }}
                 data-testid="btn-open-delete-dialog"
               >
-                <Trash2 className="inline w-4 h-4 mr-2 -mt-0.5" />
+                <Trash2 className="inline w-4 h-4 me-2 -mt-0.5" />
                 {t("delete.btn.deleteAccount")}
               </button>
             </div>

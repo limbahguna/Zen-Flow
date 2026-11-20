@@ -11,7 +11,7 @@
  *  4. Prohibits mental-health diagnosis or labelling.
  *  5. Prohibits claiming to be a doctor/therapist/psychologist.
  *  6. Preserves the crisis safety response path and helpline numbers.
- *  7. Supports en, id, and ja with per-language ABSOLUTE language rules.
+ *  7. Supports en, id, ja, and ar with per-language ABSOLUTE language rules.
  */
 
 import { beforeEach, afterEach, describe, it, expect, vi } from "vitest";
@@ -218,7 +218,7 @@ describe("system prompt — crisis safety flow", () => {
   });
 });
 
-// ── 7. Language support for en, id, ja ───────────────────────────────────────
+// ── 7. Language support for en, id, ja, ar ───────────────────────────────────────
 
 describe("system prompt — language enforcement for launch languages", () => {
   it("includes an ABSOLUTE language rule for English (en)", async () => {
@@ -236,12 +236,18 @@ describe("system prompt — language enforcement for launch languages", () => {
     expect(prompt).toMatch(/ABSOLUTE RULE.*Japanese|日本語のみ/);
   });
 
+  it("includes an ABSOLUTE language rule for Arabic (ar)", async () => {
+    const prompt = await captureSystemPrompt("ar");
+    expect(prompt).toMatch(/ABSOLUTE RULE.*Arabic|بالعربية فقط/);
+  });
+
   it("each language prompt contains the same safety rules regardless of locale", async () => {
     // Run sequentially — parallel stubs share the global fetch and capturedBody
     const en = await captureSystemPrompt("en");
     const id = await captureSystemPrompt("id");
     const ja = await captureSystemPrompt("ja");
-    for (const prompt of [en, id, ja]) {
+    const ar = await captureSystemPrompt("ar");
+    for (const prompt of [en, id, ja, ar]) {
       expect(prompt).toMatch(/NOT a doctor/i);
       expect(prompt).toMatch(/respond ONLY with the following/i);
       expect(prompt).toContain("988");

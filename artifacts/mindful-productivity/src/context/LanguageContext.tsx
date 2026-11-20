@@ -15,7 +15,7 @@
  * RTL: sets document.documentElement.dir = "rtl" for Arabic, "ltr" for others.
  */
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   type LanguageCode,
   getStoredLanguage,
@@ -44,23 +44,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = language;
   }, [language]);
 
-  // Plain function — no useCallback — so it's always fresh, never stale.
-  function setLanguage(lang: LanguageCode) {
+  const setLanguage = useCallback((lang: LanguageCode) => {
     if (!isSupportedLanguage(lang)) return; // allowlist guard
     try { localStorage.setItem("mindful_language", lang); } catch { /* storage denied */ }
     setLanguageState(lang);
-  }
+  }, []);
 
-  // Plain function — closes over `language` from the current render,
-  // so consumers always call t() with the latest language value.
-  function t(key: string, values?: Record<string, string | number>): string {
-    return translate(language, key, values);
-  }
+  // Stable across renders for the same language so notification sync effects
+  // only re-run when the language actually changes.
+  const t = useCallback(
+    (key: string, values?: Record<string, string | number>): string =>
+      translate(language, key, values),
+    [language],
+  );
 
-  // Inline value object: new reference every render → all consumers
-  // re-render whenever language (or any other dep) changes.
+  const value = useMemo(
+    () => ({ language, setLanguage, t }),
+    [language, setLanguage, t],
+  );
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

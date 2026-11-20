@@ -1,32 +1,22 @@
 import { useLanguage } from "@/context/LanguageContext";
-import { type LanguageCode } from "@/lib/translations";
-import {
-  AUTH_ARABIC_COPY,
-  WEB_AUTH_ARABIC,
-  isWebAuthLanguage,
-  webAuthLanguageOptions,
-  type WebAuthLanguage,
-} from "@/lib/webAuthCopy";
+import { isWebAuthLanguage, webAuthLanguageOptions, type WebAuthLanguage } from "@/lib/webAuthCopy";
 
 interface LanguageSelectorProps {
+  /** @deprecated Arabic is always offered; kept so existing call sites compile. */
   includeArabic?: boolean;
   value?: WebAuthLanguage;
   onLanguageChange?: (language: WebAuthLanguage) => void;
 }
 
 export default function LanguageSelector({
-  includeArabic = false,
   value,
   onLanguageChange,
 }: LanguageSelectorProps) {
   const { language, setLanguage, t } = useLanguage();
-  const options = webAuthLanguageOptions(!includeArabic);
+  const options = webAuthLanguageOptions(false);
   const selected = value ?? language;
-  const arabicUi = selected === WEB_AUTH_ARABIC;
-  const label = arabicUi ? AUTH_ARABIC_COPY["auth.language.label"] : t("auth.language.label");
-  const ariaLabel = arabicUi
-    ? AUTH_ARABIC_COPY["auth.language.ariaLabel"]
-    : t("auth.language.ariaLabel");
+  const label = t("auth.language.label");
+  const ariaLabel = t("auth.language.ariaLabel");
 
   return (
     <div className="w-full max-w-[220px]">
@@ -42,8 +32,8 @@ export default function LanguageSelector({
         onChange={(event) => {
           const next = event.target.value;
           if (!isWebAuthLanguage(next)) return;
-          onLanguageChange?.(next);
-          if (next !== WEB_AUTH_ARABIC) setLanguage(next as LanguageCode);
+          if (onLanguageChange) onLanguageChange(next);
+          else setLanguage(next);
         }}
         aria-label={ariaLabel}
         data-testid="language-selector"

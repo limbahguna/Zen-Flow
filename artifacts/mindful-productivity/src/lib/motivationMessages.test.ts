@@ -3,7 +3,7 @@
  *
  * Scope: EN / ID / JA launch languages only.
  * Legacy language fields (es/de/ar/zh) remain in the bundle but are not
- * tested as active languages — only en/id/ja are valid LanguageCode values.
+ * tested as active languages — only en/id/ja/ar are valid LanguageCode values.
  *
  * Covers: language following, date stability, date change, no API calls.
  */
@@ -27,8 +27,8 @@ describe("motivationMessages — library", () => {
     expect(MOTIVATION_MESSAGES).toHaveLength(30);
   });
 
-  it("each message has non-empty translations for EN, ID, and JA", () => {
-    const langs: LanguageCode[] = ["en", "id", "ja"];
+  it("each message has non-empty translations for EN, ID, JA, and AR", () => {
+    const langs: LanguageCode[] = ["en", "id", "ja", "ar"];
     MOTIVATION_MESSAGES.forEach((msg, i) => {
       langs.forEach((lang) => {
         expect(msg.text[lang], `message ${i} missing lang ${lang}`).toBeTruthy();
@@ -45,6 +45,12 @@ describe("motivationMessages — library", () => {
   it("English messages contain only Latin script (sanity check)", () => {
     MOTIVATION_MESSAGES.forEach((msg, i) => {
       expect(msg.text.en, `message ${i} english`).toMatch(/[a-zA-Z]/);
+    });
+  });
+
+  it("Arabic messages contain Arabic-script characters", () => {
+    MOTIVATION_MESSAGES.forEach((msg, i) => {
+      expect(msg.text.ar, `message ${i} arabic`).toMatch(/[\u0600-\u06FF]/);
     });
   });
 
@@ -80,19 +86,26 @@ describe("getDailyMessage — language following", () => {
     expect(msg).toMatch(/[\u3040-\u30FF\u4E00-\u9FFF]/);
   });
 
-  it("returns a different message for each of EN/ID/JA on the same date", () => {
+  it("returns Arabic text for 'ar'", () => {
+    const msg = getDailyMessage("2026-08-18", "ar");
+    expect(msg).toMatch(/[\u0600-\u06FF]/);
+    expect(msg).not.toBe(getDailyMessage("2026-08-18", "en"));
+  });
+
+  it("returns a different message for each of EN/ID/JA/AR on the same date", () => {
     const date = "2026-08-18";
     const en = getDailyMessage(date, "en");
     const id = getDailyMessage(date, "id");
     const ja = getDailyMessage(date, "ja");
-    // All three must differ from each other
-    const unique = new Set([en, id, ja]);
-    expect(unique.size).toBe(3);
+    const ar = getDailyMessage(date, "ar");
+    // All four must differ from each other
+    const unique = new Set([en, id, ja, ar]);
+    expect(unique.size).toBe(4);
   });
 
-  it("getDailyMessage accepts all three LanguageCode values without TypeScript errors", () => {
+  it("getDailyMessage accepts all four LanguageCode values without TypeScript errors", () => {
     // This is a compile-time assertion exercised at runtime
-    const langs: LanguageCode[] = ["en", "id", "ja"];
+    const langs: LanguageCode[] = ["en", "id", "ja", "ar"];
     for (const lang of langs) {
       const msg = getDailyMessage("2026-08-18", lang);
       expect(typeof msg).toBe("string");
@@ -196,8 +209,8 @@ describe("getMessageByIndex — bounds wrapping", () => {
     expect(getMessageByIndex(30, "en")).toBe(MOTIVATION_MESSAGES[0].text.en);
   });
 
-  it("getMessageByIndex accepts all three LanguageCode values", () => {
-    const langs: LanguageCode[] = ["en", "id", "ja"];
+  it("getMessageByIndex accepts all four LanguageCode values", () => {
+    const langs: LanguageCode[] = ["en", "id", "ja", "ar"];
     for (const lang of langs) {
       const msg = getMessageByIndex(5, lang);
       expect(typeof msg).toBe("string");

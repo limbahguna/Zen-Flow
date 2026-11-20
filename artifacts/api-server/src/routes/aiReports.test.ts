@@ -133,6 +133,25 @@ describe("POST /api/ai/reports — ownership and storage", () => {
     expect(mocks.state.rpcCalls[0].args).not.toHaveProperty("assistantResponse");
   });
 
+  it("preserves Arabic as the stored report language from the signed token", async () => {
+    const response = await request
+      .post("/api/ai/reports")
+      .set(auth)
+      .send({
+        ...validPayload(),
+        reportToken: createReportableResponseToken(
+          "verified-user-id",
+          "Server-issued assistant response",
+          "ar",
+        ),
+      });
+
+    expect(response.status).toBe(204);
+    expect(mocks.state.rpcCalls[0].args).toEqual(
+      expect.objectContaining({ p_language: "ar" }),
+    );
+  });
+
   it("rejects a valid report token issued for another user", async () => {
     const response = await request.post("/api/ai/reports").set(auth).send({
       ...validPayload(),

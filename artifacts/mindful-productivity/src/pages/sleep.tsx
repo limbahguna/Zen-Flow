@@ -43,11 +43,11 @@ export default function SleepPage() {
               const fromDailyPlan = new URLSearchParams(window.location.search).get("from") === "daily-plan";
               setLocation(fromDailyPlan ? "/daily-plan" : "/dashboard");
             }}
-            className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-[#8FA6C8] hover:bg-[#121722] transition-colors"
+            className="w-10 h-10 -ms-2 rounded-full flex items-center justify-center text-[#8FA6C8] hover:bg-[#121722] transition-colors"
             aria-label={t("sleep.backToDashboard")}
             data-testid="sleep-back"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="rtl:rotate-180 w-6 h-6" />
           </button>
           <div>
             <h1 className="font-heading font-bold text-lg">{t("sleep.hub.title")}</h1>

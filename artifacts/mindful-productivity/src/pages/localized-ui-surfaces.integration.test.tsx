@@ -145,7 +145,7 @@ describe("SetupPage — real page localization", () => {
     );
   });
 
-  it("visible language selector options contain only en, id, ja", async () => {
+  it("visible language selector options contain only en, id, ja, ar", async () => {
     await renderSetupInLang("en");
     // The SetupPage renders language buttons with data-testid="lang-{code}"
     const enBtn = screen.getByTestId("lang-en");
@@ -154,10 +154,10 @@ describe("SetupPage — real page localization", () => {
     expect(enBtn).toBeTruthy();
     expect(idBtn).toBeTruthy();
     expect(jaBtn).toBeTruthy();
+    expect(screen.getByTestId("lang-ar")).toBeTruthy();
     // Retired languages must NOT be present as buttons
     expect(screen.queryByTestId("lang-es")).toBeNull();
     expect(screen.queryByTestId("lang-de")).toBeNull();
-    expect(screen.queryByTestId("lang-ar")).toBeNull();
     expect(screen.queryByTestId("lang-zh")).toBeNull();
   });
 

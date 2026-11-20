@@ -82,7 +82,7 @@ export function LessonReader({
             aria-label={t("common.back")}
             data-testid="button-lesson-back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="rtl:rotate-180 w-5 h-5" />
             <span className="text-sm font-medium">{t("common.back")}</span>
           </button>
         </div>

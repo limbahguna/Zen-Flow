@@ -608,7 +608,7 @@ describe("getLocalLessons — 24 localized lessons", () => {
       "local-mot-5",  "local-mot-6",  "local-mot-7",  "local-mot-8",
       "local-hab-5",  "local-hab-6",  "local-hab-7",  "local-hab-8",
     ];
-    for (const lang of ["en", "id", "ja"] as LanguageCode[]) {
+    for (const lang of ["en", "id", "ja", "ar"] as LanguageCode[]) {
       const ids = getLocalLessons(lang).map((l) => l.id);
       for (const id of expectedIds) {
         expect(ids, `${lang} should contain ${id}`).toContain(id);
@@ -617,7 +617,7 @@ describe("getLocalLessons — 24 localized lessons", () => {
   });
 
   it("all lessons have non-empty localized titles and content for all locales", () => {
-    for (const lang of ["en", "id", "ja"] as LanguageCode[]) {
+    for (const lang of ["en", "id", "ja", "ar"] as LanguageCode[]) {
       const lessons = getLocalLessons(lang);
       for (const lesson of lessons) {
         expect(lesson.title.length, `${lang}/${lesson.id} title`).toBeGreaterThan(0);

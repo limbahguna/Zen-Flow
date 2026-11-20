@@ -60,8 +60,8 @@ export interface LessonRow {
  *
  * - English: fetches remote Supabase lessons and supplements with local ones
  *   (existing behaviour).
- * - Indonesian / Japanese: remote micro_lessons are English-only and cannot
- *   be served in those languages, so we return only the fully-localized
+ * - Indonesian / Japanese / Arabic: remote micro_lessons are English-only and
+ *   cannot be served in those languages, so we return only the fully-localized
  *   local catalog for those locales. No schema/database changes needed.
  */
 export async function fetchLessons(lang: LanguageCode = "en"): Promise<LessonRow[]> {

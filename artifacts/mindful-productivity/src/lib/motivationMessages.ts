@@ -1,8 +1,8 @@
 /**
  * Daily motivation messages — static library, no AI/API calls.
- * 30 messages × 3 active languages (EN/ID/JA) plus legacy fields kept for
+ * 30 messages × 4 active languages (EN/ID/JA/AR) plus legacy fields kept for
  * historical bundled data — legacy fields are inert and unreachable through
- * the public API which is strictly typed to LanguageCode (en | id | ja).
+ * the public API which is strictly typed to LanguageCode (en | id | ja | ar).
  *
  * Daily selection: deterministic from local date string (YYYY-MM-DD) so the
  * message is stable across refreshes on the same day and changes at midnight.

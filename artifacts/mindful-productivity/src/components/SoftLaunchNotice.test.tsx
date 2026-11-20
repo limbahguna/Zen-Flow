@@ -49,6 +49,7 @@ describe("soft-launch welcome notice", () => {
     ["en", "Enjoy 30 days of free access. AI Coach includes up to 10 messages per month. No payment is required."],
     ["id", "Nikmati 30 hari akses gratis. AI Coach mencakup hingga 10 pesan per bulan. Tidak perlu pembayaran."],
     ["ja", "30日間無料でご利用いただけます。AIコーチは月10件までです。お支払いは不要です。"],
+    ["ar", t("ar", "softLaunch.notice")],
   ] as const)("uses the %s welcome copy", async (language, notice) => {
     renderNotice("user-1", language);
     expect((await screen.findByTestId("soft-launch-notice")).textContent).toContain(notice);

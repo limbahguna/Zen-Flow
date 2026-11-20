@@ -21,8 +21,13 @@ import { loadFocusGoals, saveFocusGoals, type FocusGoalId } from "@/lib/focusGoa
 function formatDate(iso: string | undefined, lang: string): string {
   if (!iso) return "—";
   try {
-    const locale = lang === "ja" ? "ja-JP" : lang === "id" ? "id-ID" : "en-US";
-    return new Date(iso).toLocaleDateString(locale, { month: "long", day: "numeric", year: "numeric" });
+    const locale = lang === "ja" ? "ja-JP" : lang === "id" ? "id-ID" : lang === "ar" ? "ar-SA" : "en-US";
+    return new Date(iso).toLocaleDateString(locale, {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      ...(lang === "ar" ? { numberingSystem: "latn", calendar: "gregory" } : {}),
+    });
   }
   catch { return "—"; }
 }
@@ -214,7 +219,7 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={() => setLocation("/plans")}
-          className="flex w-full items-center gap-3 rounded-2xl border border-[#2D3A2E] bg-[#222822] p-4 text-left transition-colors hover:bg-[#2A332A]"
+          className="flex w-full items-center gap-3 rounded-2xl border border-[#2D3A2E] bg-[#222822] p-4 text-start transition-colors hover:bg-[#2A332A]"
           data-testid="profile-plans-link"
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#302A1C]">
@@ -224,7 +229,7 @@ export default function ProfilePage() {
             <p className="text-sm font-medium text-[#E8EDE3]">{t("profile.plans")}</p>
             <p className="mt-1 text-xs text-[#7A8A72]">{t("profile.plansSubtitle")}</p>
           </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-[#7A8A72]" />
+          <ChevronRight className="rtl:rotate-180 h-4 w-4 shrink-0 text-[#7A8A72]" />
         </button>
 
         {/* ── Practice focus ──────────────────────────────────────────── */}
@@ -385,7 +390,7 @@ export default function ProfilePage() {
             { icon: Phone,    labelKey: "profile.links.crisis",  path: "/crisis",   testId: "link-crisis-profile"  },
           ].map(({ icon: Icon, labelKey, path, testId }) => (
             <button key={path} onClick={() => setLocation(path)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 text-sm text-[#C8D5B9] hover:bg-[#1E241E] transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-3.5 text-sm text-[#C8D5B9] hover:bg-[#1E241E] transition-colors text-start"
               data-testid={testId}
             >
               <Icon className="w-4 h-4 text-[#7A8A72] shrink-0" />{t(labelKey)}

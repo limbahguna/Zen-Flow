@@ -1,7 +1,7 @@
 /**
  * Public marketing landing copy only.
- * Kept separate from app translations so Arabic can appear on the website
- * without changing in-app language options (en / id / ja).
+ * Arabic is also a first-class in-app language; this file stays separate so
+ * marketing strings can evolve independently of app UI dictionaries.
  */
 
 export const LANDING_LANGUAGES = {

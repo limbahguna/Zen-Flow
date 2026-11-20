@@ -1,21 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { LANGUAGE_OPTIONS, t, type LanguageCode } from "./translations";
 import {
-  AUTH_ARABIC_COPY,
+  WEB_AUTH_ARABIC,
+  isWebAuthLanguage,
   webAuthLanguageOptions,
   webAuthText,
+  type WebAuthLanguage,
 } from "./webAuthCopy";
 
 describe("web auth language options", () => {
-  it("keeps native selectors to English, Indonesian, and Japanese", () => {
+  it("offers English, Indonesian, Japanese, and Arabic on native", () => {
     expect(webAuthLanguageOptions(true).map((option) => option.code)).toEqual([
-      "en",
-      "id",
-      "ja",
-    ]);
-  });
-
-  it("adds Arabic for the public web login only", () => {
-    expect(webAuthLanguageOptions(false).map((option) => option.code)).toEqual([
       "en",
       "id",
       "ja",
@@ -23,10 +18,33 @@ describe("web auth language options", () => {
     ]);
   });
 
+  it("offers the same options on web as on native", () => {
+    expect(webAuthLanguageOptions(false)).toEqual(webAuthLanguageOptions(true));
+    expect(webAuthLanguageOptions(false)).toBe(LANGUAGE_OPTIONS);
+  });
+
+  it("includes ar in LANGUAGE_OPTIONS", () => {
+    expect(LANGUAGE_OPTIONS.map((option) => option.code)).toContain("ar");
+  });
+
+  it("folds the legacy WEB_AUTH_ARABIC constant into LanguageCode", () => {
+    const code: LanguageCode = WEB_AUTH_ARABIC;
+    const webLang: WebAuthLanguage = code;
+    expect(webLang).toBe("ar");
+    expect(isWebAuthLanguage("ar")).toBe(true);
+    expect(isWebAuthLanguage("zh")).toBe(false);
+  });
+
   it("returns Arabic login copy without falling back to English keys", () => {
-    expect(webAuthText("ar", "auth.signin.submit", () => "Sign In")).toBe(
-      AUTH_ARABIC_COPY["auth.signin.submit"],
+    const arabic = webAuthText("ar", "auth.signin.submit", () => "Sign In");
+    expect(arabic).toBe(t("ar", "auth.signin.submit"));
+    expect(arabic).not.toBe("Sign In");
+    expect(webAuthText("en", "auth.signin.submit", () => "Sign In")).toBe(
+      t("en", "auth.signin.submit"),
     );
-    expect(webAuthText("en", "auth.signin.submit", () => "Sign In")).toBe("Sign In");
+  });
+
+  it("uses the fallback when the key is unknown", () => {
+    expect(webAuthText("ar", "auth.unknown.key", () => "fallback")).toBe("fallback");
   });
 });

@@ -60,6 +60,7 @@ function NotificationNavigation() {
 
 function IntentionNotificationSync() {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const { data = [] } = useIntentions();
   const fingerprint = data.map((item) => `${item.id}:${item.updated_at}`).join("|");
 
@@ -79,7 +80,7 @@ function IntentionNotificationSync() {
     return () => {
       void clearDeviceIntentionNotifications();
     };
-  }, [user?.id, fingerprint]);
+  }, [user?.id, fingerprint, language]);
 
   return null;
 }

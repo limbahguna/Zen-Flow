@@ -28,6 +28,14 @@ const COPY = {
     hint: "次にできる小さな行動を一つ選びましょう。",
     titlePlaceholder: "小さな行動を一つ",
   },
+  ar: {
+    title: "عنوان النية", why: "لماذا تهمّك (اختياري)", action: "خطوة صغيرة لليوم",
+    reminder: "تذكير", off: "إيقاف", morning: "صباحًا", evening: "مساءً", custom: "وقت مخصص",
+    frequency: "التكرار", once: "مرة واحدة", daily: "يوميًا", days: "أيام مختارة",
+    save: "حفظ النية", close: "إغلاق", dayNames: ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"],
+    hint: "اختر فعلًا صغيرًا واحدًا يمكنك القيام به تاليًا.",
+    titlePlaceholder: "فعل صغير واحد",
+  },
 };
 
 function defaultAction(title: string) {

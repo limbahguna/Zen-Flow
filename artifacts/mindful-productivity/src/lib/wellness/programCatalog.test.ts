@@ -63,9 +63,9 @@ describe("minimal program translation keys", () => {
     "programs.practice.movement",
     "programs.reflection.prompt",
   ];
-  const languages: LanguageCode[] = ["en", "id", "ja"];
+  const languages: LanguageCode[] = ["en", "id", "ja", "ar"];
 
-  it("exists in en, id, and ja and is not the raw key", () => {
+  it("exists in en, id, ja, and ar and is not the raw key", () => {
     for (const language of languages) {
       const present = new Set(getTranslationKeys(language));
       for (const key of keys) {

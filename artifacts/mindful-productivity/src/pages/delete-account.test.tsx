@@ -263,6 +263,19 @@ describe("/delete-account — confirmation word per locale", () => {
     await user.type(input, "DELETE");
     expect(btn.disabled).toBe(false);
   });
+
+  it("AR: submit enabled when user types حذف (Arabic confirmation word)", async () => {
+    try { localStorage.setItem("mindful_language", "ar"); } catch {}
+    const user = userEvent.setup();
+    renderPage();
+    await openStep2(user);
+
+    const input = screen.getByTestId("input-confirm-delete");
+    const btn = screen.getByTestId("btn-confirm2-submit") as HTMLButtonElement;
+
+    await user.type(input, "حذف");
+    expect(btn.disabled).toBe(false);
+  });
 });
 
 // ── 4. signOut before localStorage.clear ────────────────────────────────────

@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 const TOKEN_VERSION = 1;
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1_000;
 const MAX_RESPONSE_LENGTH = 4_000;
-const REPORT_LANGUAGES = ["en", "id", "ja"] as const;
+const REPORT_LANGUAGES = ["en", "id", "ja", "ar"] as const;
 
 type ReportLanguage = (typeof REPORT_LANGUAGES)[number];
 
@@ -55,7 +55,7 @@ export function createReportableResponseToken(
   const secret = tokenSecret();
   if (!secret) return null;
   const safeLanguage: ReportLanguage =
-    language === "id" || language === "ja" ? language : "en";
+    language === "id" || language === "ja" || language === "ar" ? language : "en";
   const payload: ReportTokenPayload = {
     v: TOKEN_VERSION,
     uid: userId,

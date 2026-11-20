@@ -259,10 +259,10 @@ export function JournalEntryForm({ onClose, onSaved, entry = null }: JournalEntr
             aria-label={t("common.back")}
             data-testid="button-journal-back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="rtl:rotate-180 w-5 h-5" />
             <span className="text-sm font-medium">{t("common.back")}</span>
           </button>
-          <h1 className="font-heading font-bold text-[#E8EDE3] ml-3" data-testid="journal-form-title">
+          <h1 className="font-heading font-bold text-[#E8EDE3] ms-3" data-testid="journal-form-title">
             {t(isEditing ? "journal.form.editTitle" : "journal.form.title")}
           </h1>
         </div>

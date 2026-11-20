@@ -6,6 +6,10 @@
 @source ".";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
+@import "@fontsource/noto-sans-arabic/400.css";
+@import "@fontsource/noto-sans-arabic/500.css";
+@import "@fontsource/noto-sans-arabic/600.css";
+@import "@fontsource/noto-sans-arabic/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -111,6 +115,7 @@
   --app-font-sans: 'DM Sans', system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
+  --app-font-arabic: 'Noto Sans Arabic', 'DM Sans', system-ui, sans-serif;
   --radius: 0.75rem;
   --app-safe-area-top: env(safe-area-inset-top, 0px);
   --app-safe-area-right: env(safe-area-inset-right, 0px);
@@ -164,6 +169,28 @@ html.capacitor-native {
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+
+  /* Arabic RTL: comfortable Noto Sans Arabic; keep Western digits LTR. */
+  html[dir="rtl"] body {
+    font-family: var(--app-font-arabic);
+    line-height: 1.7;
+  }
+
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] h5,
+  html[dir="rtl"] h6 {
+    font-family: var(--app-font-arabic);
+    line-height: 1.55;
+  }
+
+  .ltr-nums {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: lining-nums;
   }
 }
 

@@ -416,7 +416,7 @@ export default function CoachPage() {
                   key={s.text}
                   onClick={() => void sendMessage(s.text)}
                   whileTap={{ scale: 0.97 }}
-                  className="w-full text-left px-4 py-3 rounded-2xl border border-[#2D3A2E] bg-[#1E241E] text-sm text-[#C8D5B9] hover:border-[#8FA680]/40 hover:bg-[#2D3A2E] hover:text-[#E8EDE3] transition-all duration-200 flex items-center gap-2.5"
+                  className="w-full text-start px-4 py-3 rounded-2xl border border-[#2D3A2E] bg-[#1E241E] text-sm text-[#C8D5B9] hover:border-[#8FA680]/40 hover:bg-[#2D3A2E] hover:text-[#E8EDE3] transition-all duration-200 flex items-center gap-2.5"
                   data-testid={`suggestion-${s.text.slice(0,20).toLowerCase().replace(/\s+/g,"-")}`}
                 >
                   <span className="text-lg">{s.emoji}</span>

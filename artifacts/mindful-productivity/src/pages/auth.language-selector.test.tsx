@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { t } from "@/lib/translations";
 import AuthPage from "./auth";
 
 const mocks = vi.hoisted(() => ({
@@ -75,16 +76,16 @@ describe("public auth language selector", () => {
     expect(screen.getByLabelText("Select language")).toBe(selector);
   });
 
-  it("hides Arabic on native auth", () => {
+  it("also offers Arabic on native auth", () => {
     mocks.native = true;
     renderAuth();
 
     expect(screen.getByRole("option", { name: "English" })).not.toBeNull();
-    expect(screen.queryByRole("option", { name: "العربية" })).toBeNull();
+    expect(screen.getByRole("option", { name: "العربية" })).not.toBeNull();
     expect(screen.getByTestId("auth-page").getAttribute("dir")).toBe("ltr");
   });
 
-  it("translates web login copy to Arabic and uses RTL", async () => {
+  it("translates login copy to Arabic, uses RTL, and persists the language", async () => {
     const user = userEvent.setup();
     renderAuth();
 
@@ -93,11 +94,14 @@ describe("public auth language selector", () => {
     const page = screen.getByTestId("auth-page");
     expect(page.getAttribute("dir")).toBe("rtl");
     expect(page.getAttribute("lang")).toBe("ar");
-    expect(screen.getByTestId("button-google-login").textContent).toContain("المتابعة بالحساب");
-    expect((screen.getByTestId("button-google-login").textContent.match(/Google/g) ?? []).length).toBe(0);
-    expect(screen.getByTestId("tab-signin").textContent).toBe("تسجيل الدخول");
-    expect(screen.getByTestId("button-submit-signin").textContent).toBe("تسجيل الدخول");
-    expect(localStorage.getItem("mindful_language")).not.toBe("ar");
+    expect(screen.getByTestId("button-google-login").textContent).toContain(
+      t("ar", "auth.google.cta"),
+    );
+    expect(screen.getByTestId("tab-signin").textContent).toBe(t("ar", "auth.tab.signin"));
+    expect(screen.getByTestId("button-submit-signin").textContent).toBe(
+      t("ar", "auth.signin.submit"),
+    );
+    expect(localStorage.getItem("mindful_language")).toBe("ar");
   });
 
   it("persists Indonesian and translates the sign-in and sign-up states", async () => {
