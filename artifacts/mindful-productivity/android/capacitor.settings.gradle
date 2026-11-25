@@ -2,11 +2,20 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../../../node_modules/.pnpm/@capacitor+android@7.6.8_@capacitor+core@7.6.8/node_modules/@capacitor/android/capacitor')
 
+include ':capacitor-community-speech-recognition'
+project(':capacitor-community-speech-recognition').projectDir = new File('../../../node_modules/.pnpm/@capacitor-community+speech_1d574d23cdf85c3a304badc146f1d94d/node_modules/@capacitor-community/speech-recognition/android')
+
+include ':capacitor-community-text-to-speech'
+project(':capacitor-community-text-to-speech').projectDir = new File('../../../node_modules/.pnpm/@capacitor-community+text-t_c155f92db3703c223fcab5c924fea4f9/node_modules/@capacitor-community/text-to-speech/android')
+
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../../../node_modules/.pnpm/@capacitor+app@7.1.2_@capacitor+core@7.6.8/node_modules/@capacitor/app/android')
 
 include ':capacitor-browser'
 project(':capacitor-browser').projectDir = new File('../../../node_modules/.pnpm/@capacitor+browser@7.0.5_@capacitor+core@7.6.8/node_modules/@capacitor/browser/android')
+
+include ':capacitor-keyboard'
+project(':capacitor-keyboard').projectDir = new File('../../../node_modules/.pnpm/@capacitor+keyboard@7.0.6_@capacitor+core@7.6.8/node_modules/@capacitor/keyboard/android')
 
 include ':capacitor-local-notifications'
 project(':capacitor-local-notifications').projectDir = new File('../../../node_modules/.pnpm/@capacitor+local-notifications@7.0.7_@capacitor+core@7.6.8/node_modules/@capacitor/local-notifications/android')

@@ -14,5 +14,11 @@ project(':capacitor-local-notifications').projectDir = new File('./capacitor-loc
 include ':capacitor-keyboard'
 project(':capacitor-keyboard').projectDir = new File('./capacitor-keyboard/')
 
+include ':capacitor-community-speech-recognition'
+project(':capacitor-community-speech-recognition').projectDir = new File('./capacitor-speech-recognition/')
+
+include ':capacitor-community-text-to-speech'
+project(':capacitor-community-text-to-speech').projectDir = new File('./capacitor-text-to-speech/')
+
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')

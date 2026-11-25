@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, User as UserIcon, Send, RotateCcw, Info, X, Flag, Loader2 } from "lucide-react";
+import { Bot, User as UserIcon, Send, RotateCcw, Info, X, Flag, Loader2, Mic } from "lucide-react";
 import { CrisisModal } from "@/components/CrisisModal";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +13,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import type { LanguageCode } from "@/lib/translations";
 import { useToast } from "@/hooks/use-toast";
 import { useKeyboardInset } from "@/hooks/useKeyboardInset";
+import { useCompanionVoice } from "@/hooks/useCompanionVoice";
+import { formatVoiceElapsed } from "@/lib/companionVoice";
 import { useSubscription } from "@/hooks/useSubscription";
 import { trackEvent } from "@/lib/analytics";
 import { appApiUrl } from "@/lib/apiRuntime";
@@ -258,9 +260,21 @@ export default function CoachPage() {
     }
   }
 
+  const quotaReached = remaining !== null && remaining <= 0;
+  const voice = useCompanionVoice({
+    language,
+    userId: uid,
+    disabled: typing || quotaReached || !session?.access_token,
+  });
+
+  useEffect(() => {
+    if (crisisModal) voice.stopSpeaking();
+  }, [crisisModal, voice.stopSpeaking]);
+
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || typing) return;
+    voice.stopSpeaking();
     if (!session?.access_token) { setError(t("coach.error.signin")); return; }
     if (remaining !== null && remaining <= 0) { setError(t("coach.error.limit")); return; }
     if (hasCrisisKeywords(trimmed)) { setCrisisModal(true); return; }
@@ -297,15 +311,17 @@ export default function CoachPage() {
         plan: "free" | "plus" | "pro";
         reportToken?: string | null;
       };
+      const replyId = crypto.randomUUID();
       setMessages(prev => [
         ...prev,
         {
-          id: crypto.randomUUID(),
+          id: replyId,
           role: "assistant",
           content: data.reply,
           reportToken: data.reportToken ?? undefined,
         },
       ]);
+      void voice.speak(data.reply, replyId, false);
       // Sync quota from the entitlement-aware server response.
       setRemaining(data.remaining);
       trackEvent("coach_response_success", { plan: data.plan });
@@ -314,12 +330,11 @@ export default function CoachPage() {
     } finally {
       setTyping(false);
     }
-  }, [messages, remaining, typing, userContext, session, t]);
+  }, [messages, remaining, typing, userContext, session, t, voice.speak, voice.stopSpeaking]);
 
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); void sendMessage(input); };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(input); } };
 
-  const quotaReached = remaining !== null && remaining <= 0;
   const isEmpty   = messages.length === 0;
 
   // counts for "Coach knows"
@@ -485,6 +500,16 @@ export default function CoachPage() {
               >
                 {msg.content}
               </div>
+              {msg.role === "assistant" && voice.speakingId === msg.id && (
+                <button
+                  type="button"
+                  onClick={voice.stopSpeaking}
+                  className="inline-flex min-h-10 items-center rounded-lg px-2.5 text-xs font-medium text-[#C8D5B9]"
+                  data-testid="coach-voice-stop"
+                >
+                  {t("coach.voice.stop")}
+                </button>
+              )}
               {msg.role === "assistant" && msg.reportToken && (
                 <button
                   type="button"
@@ -659,7 +684,50 @@ export default function CoachPage() {
             : "calc(4rem + env(safe-area-inset-bottom, 0px))",
         }}
       >
+        <div className="max-w-4xl mx-auto px-4 pt-2 text-start">
+          <label className="inline-flex items-center gap-2 text-xs text-[#A3B197]">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-[#8FA680]"
+              checked={voice.readAloud}
+              onChange={(event) => voice.setReadAloud(event.target.checked)}
+              data-testid="coach-read-aloud"
+            />
+            {t("coach.voice.readAloud")}
+          </label>
+          {!voice.supported && (
+            <p className="mt-1 text-xs text-[#7A8A72]" data-testid="coach-voice-unsupported">{t("coach.voice.unsupported")}</p>
+          )}
+          {voice.permissionDenied && (
+            <p className="mt-1 text-xs text-[#D4806A]" data-testid="coach-voice-permission">{t("coach.voice.permission")}</p>
+          )}
+          {voice.failed && (
+            <p className="mt-1 text-xs text-[#D4806A]" data-testid="coach-voice-failed">{t("coach.voice.failed")}</p>
+          )}
+          {voice.recording && (
+            <p className="mt-1 text-xs text-[#C8D5B9]" data-testid="coach-voice-recording">
+              {t("coach.voice.recording")}
+              <span className="ms-2 ltr-nums tabular-nums" dir="ltr">{formatVoiceElapsed(voice.elapsed)}</span>
+              <span className="ms-2">{t("coach.voice.tapToStop")}</span>
+            </p>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto px-4 py-3 flex gap-2 items-end">
+          {voice.supported && (
+            <button
+              type="button"
+              onClick={() => void voice.toggleRecording((text) => {
+                setInput((current) => (current.trim() ? `${current.trim()} ${text}` : text));
+              })}
+              disabled={typing || quotaReached || !session?.access_token}
+              aria-pressed={voice.recording}
+              aria-label={voice.recording ? t("coach.voice.tapToStop") : t("coach.voice.mic")}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${voice.recording ? "bg-[#D4806A] text-[#E8EDE3] animate-pulse" : "bg-[#2D3A2E] text-[#C8D5B9]"}`}
+              data-testid="coach-mic"
+            >
+              <Mic className="w-4 h-4" />
+            </button>
+          )}
           <textarea
             ref={inputRef}
             value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}

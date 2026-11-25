@@ -4,4 +4,5 @@
     <string name="title_activity_main">KindEase</string>
     <string name="package_name">com.davidhendrya.mindfulspace</string>
     <string name="custom_url_scheme">com.davidhendrya.mindfulspace</string>
+    <string name="microphone_permission_rationale">KindEase uses the microphone only when you tap the mic, so Companion can hear a message you choose to send. You can keep typing instead.</string>
 </resources>

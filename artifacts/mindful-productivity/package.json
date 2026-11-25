@@ -15,6 +15,8 @@
     "test": "vitest run --reporter=verbose"
   },
   "devDependencies": {
+    "@capacitor-community/speech-recognition": "7.0.1",
+    "@capacitor-community/text-to-speech": "6.1.0",
     "@capacitor/android": "^7.6.8",
     "@capacitor/app": "^7.1.2",
     "@capacitor/browser": "^7.0.5",
