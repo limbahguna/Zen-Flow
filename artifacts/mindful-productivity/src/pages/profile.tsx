@@ -6,6 +6,7 @@ import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { MovementReminderSettings } from "@/components/MovementReminderSettings";
 import { DailyRhythmSettings } from "@/components/DailyRhythmSettings";
+import { StressConsentSettings } from "@/components/StressConsentSettings";
 import { MovementSession } from "@/components/MovementSession";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -335,6 +336,7 @@ export default function ProfilePage() {
 
         {/* ── Daily Rhythm + Movement Reminder ────────────────────────── */}
         <DailyRhythmSettings />
+        <StressConsentSettings />
         <MovementReminderSettings onStartSession={() => setMovementSessionOpen(true)} />
 
         {/* ── Sign out ────────────────────────────────────────────────── */}

@@ -158,6 +158,7 @@ let errorSpy: ReturnType<typeof vi.spyOn>;
 const SERVICE_ROLE_KEY_VALUE = "test-service-role-key-secret-value";
 
 const REQUIRED_SUPABASE_TABLES = [
+  "user_stress_estimates",
   "lesson_progress",
   "journal_entries",
   "fear_settings",

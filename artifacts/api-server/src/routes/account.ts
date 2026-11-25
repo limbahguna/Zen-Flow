@@ -94,6 +94,7 @@ router.delete("/account", async (_req, res) => {
   // Tables deleted in FK-safe order (dependents before their parents).
   // coach_usage auto-cascades when auth.users is deleted (Step 3).
   const supabaseTables = [
+    "user_stress_estimates",
     "lesson_progress",
     "journal_entries",
     "fear_settings",

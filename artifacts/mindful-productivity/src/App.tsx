@@ -44,6 +44,8 @@ import {
 import { dailyRhythmCopyFromTranslations } from "@/lib/dailyRhythmCopy";
 import { DailyRhythmPrompt } from "@/components/DailyRhythmPrompt";
 import { useKeyboardInset } from "@/hooks/useKeyboardInset";
+import { useStressCheck } from "@/hooks/useStressCheck";
+import { syncStressNudge } from "@/lib/stressNudge";
 
 function KeyboardInset() {
   useKeyboardInset();
@@ -104,6 +106,21 @@ function MovementNotificationSync() {
     })();
   }, [t]);
 
+  return null;
+}
+
+function StressNudgeSync() {
+  const { t } = useLanguage();
+  const { threeDayElevated } = useStressCheck();
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    void syncStressNudge({
+      config: loadDailyRhythmConfig(),
+      threeDayElevated,
+      title: t("stress.nudge.title"),
+      body: t("stress.nudge.body"),
+    });
+  }, [t, threeDayElevated]);
   return null;
 }
 
@@ -234,6 +251,7 @@ function UserScopedApplication() {
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <NotificationNavigation />
               <DailyRhythmPrompt />
+              <StressNudgeSync />
               <Router />
             </WouterRouter>
           </CoachProvider>

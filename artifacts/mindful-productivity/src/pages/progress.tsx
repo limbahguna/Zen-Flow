@@ -6,6 +6,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProgressReport } from "@/hooks/useProgress";
+import { useStressCheck } from "@/hooks/useStressCheck";
+import { StressTrend } from "@/components/progress/StressTrend";
 import { t as translate } from "@/lib/translations";
 import { shareOrCopySummary } from "@/lib/wellness/shareProgress";
 import { getProgram } from "@/lib/wellness/programCatalog";
@@ -35,6 +37,7 @@ export default function ProgressPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const progress = useProgressReport();
+  const stress = useStressCheck();
   const report = progress.report;
   const program = report?.programSlug ? getProgram(report.programSlug) : null;
 
@@ -74,6 +77,12 @@ export default function ProgressPage() {
       </header>
 
       <main className="mx-auto max-w-4xl space-y-5 px-4 pt-8">
+        <StressTrend
+          days={stress.days}
+          isLoading={stress.isLoading}
+          isError={stress.isError}
+          onRetry={stress.retry}
+        />
         {!user && (
           <div
             className="rounded-2xl border border-[#4D3020] bg-[#2D2420] px-4 py-4 text-center text-sm text-[#D4806A]"

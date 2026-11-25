@@ -56,6 +56,7 @@ export interface WellnessPreferences {
   preferred_reminder_time: string;
   timezone: string;
   locale: WellnessLocale;
+  journal_sentiment_consent?: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -26,6 +26,8 @@ import { OnboardingFlow, onboardingCompleted } from "@/components/OnboardingFlow
 import WeeklyReportCard from "@/components/WeeklyReportCard";
 import { DashboardProgramCard } from "@/components/programs/DashboardProgramCard";
 import { DashboardProgressCard } from "@/components/progress/DashboardProgressCard";
+import { StressCheckCard } from "@/components/progress/StressCheckCard";
+import { useStressCheck } from "@/hooks/useStressCheck";
 import { useAdaptiveDailyInsight } from "@/hooks/useAdaptiveDailyInsight";
 import { useTasks } from "@/hooks/useTasks";
 import { useAnxietyChecks } from "@/hooks/useAnxietyChecks";
@@ -188,6 +190,7 @@ export default function DashboardPage() {
   const { data: journalEntries } = useJournal();
   const { data: intentions = [] } = useIntentions();
   const intentionActions = useIntentionActions();
+  const stress = useStressCheck();
 
   // modals
   const [wizardOpen,    setWizardOpen]    = useState(false);
@@ -750,6 +753,13 @@ export default function DashboardPage() {
         })()}
 
         <DashboardProgramCard />
+        <StressCheckCard
+          isLoading={stress.isLoading}
+          isError={stress.isError}
+          today={stress.today}
+          threeDayElevated={stress.threeDayElevated}
+          onRetry={stress.retry}
+        />
         <DashboardProgressCard />
 
         {/* ── Daily Motivation ───────────────────────────────────────── */}
