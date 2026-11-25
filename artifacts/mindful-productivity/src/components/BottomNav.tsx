@@ -1,10 +1,12 @@
 import { useLocation } from "wouter";
 import { Home, Leaf, Bot, User } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset";
 
 export function BottomNav() {
   const [location, setLocation] = useLocation();
   const { t } = useLanguage();
+  const { open: keyboardOpen } = useKeyboardInset();
 
   const NAV_ITEMS = [
     { path: "/dashboard", labelKey: "nav.home",     icon: Home },
@@ -12,6 +14,8 @@ export function BottomNav() {
     { path: "/coach",     labelKey: "nav.coach",    icon: Bot  },
     { path: "/profile",   labelKey: "nav.profile",  icon: User },
   ];
+
+  if (keyboardOpen) return null;
 
   return (
     <nav

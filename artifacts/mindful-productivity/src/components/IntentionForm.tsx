@@ -77,7 +77,7 @@ export function IntentionForm({
 
   const valid = title.trim() && action.trim() && (frequency !== "selected_days" || days.length > 0);
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center">
+    <div className="keyboard-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center">
       <form
         className="max-h-[88vh] w-full max-w-md space-y-4 overflow-y-auto rounded-2xl border border-[#2D3A2E] bg-[#222822] p-5"
         onSubmit={async (event) => {

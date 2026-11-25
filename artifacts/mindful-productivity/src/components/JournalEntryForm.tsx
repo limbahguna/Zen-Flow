@@ -438,7 +438,9 @@ export function JournalEntryForm({ onClose, onSaved, entry = null }: JournalEntr
             </div>
           </div>
 
-          <div className="fixed bottom-0 inset-x-0 bg-[#141814]/90 backdrop-blur-md border-t border-[#2D3A2E]">
+          <div aria-hidden="true" style={{ height: "calc(7.5rem + var(--keyboard-inset, 0px))" }} />
+
+          <div className="keyboard-dock fixed inset-x-0 bg-[#141814]/90 backdrop-blur-md border-t border-[#2D3A2E]">
             <div className="max-w-2xl mx-auto px-5 py-4 space-y-3">
               {missingFields.length > 0 && (
                 <div

@@ -135,6 +135,31 @@ html.capacitor-native {
   --app-safe-area-left: 0px;
 }
 
+:root {
+  --keyboard-inset: 0px;
+}
+
+/* Hide the tab bar on every page while the keyboard is open. */
+html.keyboard-open .bottom-nav {
+  display: none;
+}
+
+/* Let in-flow fields scroll clear of the overlay keyboard. */
+html.keyboard-open body {
+  padding-bottom: calc(var(--app-safe-area-bottom) + var(--keyboard-inset));
+}
+
+/* Fixed footers sit on top of the keyboard instead of underneath it. */
+.keyboard-dock {
+  bottom: var(--keyboard-inset);
+}
+
+/* Bottom sheets and dialogs that contain inputs. */
+html.keyboard-open .keyboard-sheet,
+html.keyboard-open .fixed.inset-0.flex.items-end {
+  padding-bottom: calc(1rem + var(--keyboard-inset));
+}
+
 @layer base {
   * {
     @apply border-border;

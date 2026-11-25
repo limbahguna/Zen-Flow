@@ -43,6 +43,12 @@ import {
 } from "@/lib/dailyRhythmNotifications";
 import { dailyRhythmCopyFromTranslations } from "@/lib/dailyRhythmCopy";
 import { DailyRhythmPrompt } from "@/components/DailyRhythmPrompt";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset";
+
+function KeyboardInset() {
+  useKeyboardInset();
+  return null;
+}
 
 function NotificationNavigation() {
   const [, setLocation] = useLocation();
@@ -219,6 +225,7 @@ function UserScopedApplication() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <div className="app-shell">
+          <KeyboardInset />
           <LanguageProfileSync />
           <IntentionNotificationSync />
           <MovementNotificationSync />

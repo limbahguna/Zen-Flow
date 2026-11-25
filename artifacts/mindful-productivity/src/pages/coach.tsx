@@ -12,6 +12,7 @@ import { useCoachContext, type CoachMessage as Message } from "@/context/CoachCo
 import { useLanguage } from "@/context/LanguageContext";
 import type { LanguageCode } from "@/lib/translations";
 import { useToast } from "@/hooks/use-toast";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset";
 import { useSubscription } from "@/hooks/useSubscription";
 import { trackEvent } from "@/lib/analytics";
 import { appApiUrl } from "@/lib/apiRuntime";
@@ -116,6 +117,10 @@ export default function CoachPage() {
   );
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { inset, open: keyboardOpen } = useKeyboardInset();
+  const [composerHeight, setComposerHeight] = useState(72);
 
   // language is in deps so context updates reactively if user changes language
   const userContext = useMemo(
@@ -130,7 +135,33 @@ export default function CoachPage() {
     { emoji: "⚡", text: t("coach.suggestion.productive") },
   ], [t]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, typing]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView?.({ block: "end" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [messages, typing, keyboardOpen, inset]);
+
+  useEffect(() => {
+    const field = inputRef.current;
+    if (!field) return;
+    field.style.height = "auto";
+    const max = 128;
+    const next = Math.min(field.scrollHeight, max);
+    field.style.height = `${next}px`;
+    field.style.overflowY = field.scrollHeight > max ? "auto" : "hidden";
+  }, [input]);
+
+  useEffect(() => {
+    const bar = composerRef.current;
+    if (!bar) return;
+    const measure = () => setComposerHeight(bar.getBoundingClientRect().height);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, [keyboardOpen, input]);
 
   useEffect(() => {
     if (subscription) {
@@ -314,10 +345,10 @@ export default function CoachPage() {
   }
 
   return (
-    <motion.div className="min-h-screen bg-background flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+    <motion.div className="min-h-screen h-[100dvh] overflow-hidden bg-background flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
 
       {/* Header */}
-      <header className="bg-[#141814]/90 backdrop-blur-md border-b border-[#2D3A2E] sticky top-0 z-10">
+      <header className="shrink-0 bg-[#141814]/90 backdrop-blur-md border-b border-[#2D3A2E] sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-3">
 
           {/* Avatar with pulse */}
@@ -372,7 +403,14 @@ export default function CoachPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 pt-4 pb-36 overflow-y-auto">
+      <main
+        className="min-h-0 flex-1 max-w-4xl w-full mx-auto px-4 pt-4 overflow-y-auto"
+        style={{
+          paddingBottom: keyboardOpen
+            ? `calc(${composerHeight}px + var(--keyboard-inset))`
+            : `calc(${composerHeight}px + 4rem + env(safe-area-inset-bottom, 0px))`,
+        }}
+      >
 
         {/* Coach knows section */}
         {isEmpty && !coachKnowsDismissed && hasUserData && (
@@ -501,7 +539,7 @@ export default function CoachPage() {
 
       {reportTarget && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+          className="keyboard-sheet fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-labelledby="coach-report-title"
@@ -611,9 +649,19 @@ export default function CoachPage() {
       )}
 
       {/* Input bar */}
-      <div className="fixed bottom-16 inset-x-0 z-20 bg-[#141814]/90 backdrop-blur-md border-t border-[#2D3A2E]">
+      <div
+        ref={composerRef}
+        data-testid="coach-composer"
+        className="fixed inset-x-0 z-20 bg-[#141814]/90 backdrop-blur-md border-t border-[#2D3A2E]"
+        style={{
+          bottom: keyboardOpen
+            ? "var(--keyboard-inset)"
+            : "calc(4rem + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto px-4 py-3 flex gap-2 items-end">
           <textarea
+            ref={inputRef}
             value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
             onContextMenu={(event) => {
               if (document.documentElement.classList.contains("capacitor-native")) {
@@ -624,7 +672,7 @@ export default function CoachPage() {
             disabled={typing || quotaReached || !session?.access_token}
             rows={1}
             inputMode="text"
-            className="coach-composer flex-1 resize-none rounded-xl border border-[#2D3A2E] bg-[#1A1E1A] px-4 py-2.5 text-sm text-[#C8D5B9] placeholder:text-[#7A8A72] focus:outline-none focus:ring-1 focus:ring-[#8FA680]/40 focus:border-[#8FA680]/40 transition-colors duration-200 disabled:opacity-50 max-h-32"
+            className="coach-composer flex-1 resize-none rounded-xl border border-[#2D3A2E] bg-[#1A1E1A] px-4 py-2.5 text-[16px] text-[#C8D5B9] placeholder:text-[#7A8A72] focus:outline-none focus:ring-1 focus:ring-[#8FA680]/40 focus:border-[#8FA680]/40 transition-colors duration-200 disabled:opacity-50 max-h-32"
             style={{ lineHeight: "1.5" }}
             data-testid="coach-input"
           />

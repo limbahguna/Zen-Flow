@@ -1008,7 +1008,7 @@ export default function DashboardPage() {
       <AnimatePresence>
         {intentionOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 p-4"
+            className="keyboard-sheet fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 p-4"
           >
             <motion.div initial={{ y: 40 }} animate={{ y: 0 }} exit={{ y: 40 }}
               className="w-full max-w-md bg-[#222822] border border-[#2D3A2E] rounded-2xl p-6 space-y-4"

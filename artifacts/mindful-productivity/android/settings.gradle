@@ -11,5 +11,8 @@ project(':capacitor-browser').projectDir = new File('./capacitor-browser/')
 include ':capacitor-local-notifications'
 project(':capacitor-local-notifications').projectDir = new File('./capacitor-local-notifications/')
 
+include ':capacitor-keyboard'
+project(':capacitor-keyboard').projectDir = new File('./capacitor-keyboard/')
+
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')

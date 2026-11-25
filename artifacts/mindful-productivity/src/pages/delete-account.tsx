@@ -287,7 +287,7 @@ export default function DeleteAccountPage() {
       {/* ── 2-step confirmation dialog ───────────────────────────────────────── */}
       {dialogStep !== null && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+          className="keyboard-sheet fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)" }}
           role="dialog"
           aria-modal="true"
